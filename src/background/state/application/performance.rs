@@ -1,10 +1,9 @@
 use std::sync::{LazyLock, atomic::AtomicU8};
 
 use seelen_core::{handlers::SeelenEvent, state::PerformanceMode, system_state::PowerMode};
-use tauri::Listener;
 
 use crate::{
-    app::{emit_to_webviews, get_app_handle},
+    app::{emit_to_webviews, on_internal_event},
     hook::HookManager,
     state::application::FULL_STATE,
     tauri_handlers::Handlers,
@@ -41,12 +40,9 @@ impl Optimizations {
         self.inner
             .store(initial_u8, std::sync::atomic::Ordering::SeqCst);
 
-        let handle = get_app_handle();
-        handle.listen(SeelenEvent::PowerMode, |_| Self::check_for_changes());
-        handle.listen(SeelenEvent::PowerStatus, |_| Self::check_for_changes());
-        handle.listen(SeelenEvent::StateSettingsChanged, |_| {
-            Self::check_for_changes()
-        });
+        on_internal_event(SeelenEvent::PowerMode, Self::check_for_changes);
+        on_internal_event(SeelenEvent::PowerStatus, Self::check_for_changes);
+        on_internal_event(SeelenEvent::StateSettingsChanged, Self::check_for_changes);
 
         HookManager::subscribe(|(event, _origin)| {
             if matches!(

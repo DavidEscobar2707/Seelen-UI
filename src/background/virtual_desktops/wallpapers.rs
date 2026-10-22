@@ -8,12 +8,10 @@ use seelen_core::handlers::SeelenEvent;
 use seelen_core::resource::WallpaperId;
 use seelen_core::state::{WallpaperCollection, WorkspaceId};
 use seelen_core::system_state::MonitorId;
-use tauri::Listener;
 use tokio::sync::{Notify, mpsc};
 use tokio::time::Instant;
 use uuid::Uuid;
 
-use crate::app::get_app_handle;
 use crate::error::{Result, ResultLogExt};
 use crate::get_tokio_handle;
 use crate::state::application::FULL_STATE;
@@ -52,7 +50,7 @@ impl WorkspaceWallpapersManager {
         });
 
         // Listen for settings changes
-        get_app_handle().listen(SeelenEvent::StateSettingsChanged, |_| {
+        crate::app::on_internal_event(SeelenEvent::StateSettingsChanged, || {
             Self::on_settings_changed();
         });
     }

@@ -25,6 +25,21 @@ pub fn get_app_handle<'a>() -> &'a AppHandle<Wry> {
         .expect("get_app_handle called but app is still not initialized")
 }
 
+type InternalListener = std::sync::Arc<dyn Fn() + Send + Sync + 'static>;
+
+static INTERNAL_LISTENERS: std::sync::LazyLock<
+    parking_lot::RwLock<Vec<(&'static str, InternalListener)>>,
+> = std::sync::LazyLock::new(Default::default);
+
+/// In-process subscription to the events published by [`emit_to_webviews`] (the tauri
+/// `listen` on the app handle no longer receives them, the websocket hub is the only transport).
+/// The callback runs synchronously on the emitting thread, so it must not block.
+pub fn on_internal_event(event: &'static str, cb: impl Fn() + Send + Sync + 'static) {
+    INTERNAL_LISTENERS
+        .write()
+        .push((event, std::sync::Arc::new(cb)));
+}
+
 pub fn emit_to_webviews<S>(event: &str, payload: S)
 where
     S: serde::Serialize,
@@ -43,6 +58,16 @@ where
 
     // single transport: the events websocket hub (tauri events leak memory, see libs/core handlers)
     crate::server::events::EVENTS_HUB.publish(event, &payload);
+
+    let listeners: Vec<InternalListener> = INTERNAL_LISTENERS
+        .read()
+        .iter()
+        .filter(|(name, _)| *name == event)
+        .map(|(_, cb)| cb.clone())
+        .collect();
+    for cb in listeners {
+        cb();
+    }
 }
 
 pub struct SeelenUI {}
