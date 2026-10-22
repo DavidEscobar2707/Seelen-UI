@@ -156,6 +156,7 @@ pub fn register_win_hook() -> Result<()> {
     log::trace!("Registering Windows and Virtual Desktop Hooks");
     init_zombie_window_killer();
     HookManager::start();
+    crate::utils::idle::init();
 
     let eid = HookManager::subscribe(|(event, origin)| match event {
         WinEvent::SystemMoveSizeStart => {

@@ -1,5 +1,6 @@
 pub mod constants;
 pub mod icon_extractor;
+pub mod idle;
 pub mod integrity;
 pub mod lock_free;
 pub mod pwsh;

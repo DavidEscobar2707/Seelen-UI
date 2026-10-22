@@ -2,8 +2,12 @@ use std::sync::atomic::{AtomicBool, AtomicIsize, AtomicU32, Ordering};
 use windows::Win32::{
     Foundation::{HWND, LPARAM, LRESULT, WPARAM},
     System::{
-        Power::RegisterSuspendResumeNotification,
+        Power::{
+            POWERBROADCAST_SETTING, RegisterPowerSettingNotification,
+            RegisterSuspendResumeNotification,
+        },
         RemoteDesktop::{NOTIFY_FOR_ALL_SESSIONS, WTSRegisterSessionNotification},
+        SystemServices::GUID_CONSOLE_DISPLAY_STATE,
     },
     UI::{
         Shell::{
@@ -14,8 +18,8 @@ use windows::Win32::{
             CreateWindowExW, DEVICE_NOTIFY_WINDOW_HANDLE, DefWindowProcW, DispatchMessageW,
             GetMessageW, MSG, PostQuitMessage, RegisterClassW, RegisterShellHookWindow,
             RegisterWindowMessageW, TranslateMessage, WINDOW_EX_STYLE, WINDOW_STYLE, WM_APP,
-            WM_DESTROY, WM_ENDSESSION, WM_WTSSESSION_CHANGE, WNDCLASSW, WTS_SESSION_LOCK,
-            WTS_SESSION_UNLOCK,
+            WM_DESTROY, WM_ENDSESSION, WM_POWERBROADCAST, WM_WTSSESSION_CHANGE, WNDCLASSW,
+            WTS_SESSION_LOCK, WTS_SESSION_UNLOCK,
         },
     },
 };
@@ -38,6 +42,8 @@ pub static BACKGROUND_HWND: AtomicIsize = AtomicIsize::new(0);
 /// Window message sent to the background window when the recycle bin state changes.
 pub const WM_TRASH_BIN_NOTIFY: u32 = WM_APP + 100;
 
+/// PBT_POWERSETTINGCHANGE
+const PBT_POWERSETTINGCHANGE: u32 = 0x8013;
 /// CSIDL for the Recycle Bin virtual folder.
 const CSIDL_BITBUCKET: i32 = 0x000a;
 /// SHCNRF_ShellLevel
@@ -101,6 +107,13 @@ impl BgWindowProc {
             // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registersuspendresumenotification
             let _resume_suspend_handle =
                 RegisterSuspendResumeNotification(hwnd.into(), DEVICE_NOTIFY_WINDOW_HANDLE)?;
+
+            // display on/off, used by the shared pause flag (utils::idle)
+            let _display_state_handle = RegisterPowerSettingNotification(
+                hwnd.into(),
+                &GUID_CONSOLE_DISPLAY_STATE,
+                DEVICE_NOTIFY_WINDOW_HANDLE,
+            )?;
 
             // Register for session change notifications (lock/unlock, user switch, etc.)
             // This is critical for pausing background threads when session is not interactive
@@ -167,6 +180,14 @@ impl BgWindowProc {
             // OS shutdown/logoff: restore the native taskbar before we get killed
             if msg == WM_ENDSESSION && w_param.0 != 0 {
                 let _ = crate::widgets::weg::native_taskbar::restore_native_taskbar();
+            }
+
+            if msg == WM_POWERBROADCAST && w_param.0 as u32 == PBT_POWERSETTINGCHANGE {
+                let setting = l_param.0 as *const POWERBROADCAST_SETTING;
+                if !setting.is_null() && (*setting).PowerSetting == GUID_CONSOLE_DISPLAY_STATE {
+                    // 0 = off, 1 = on, 2 = dimmed
+                    crate::utils::idle::set_display_off((*setting).Data[0] == 0);
+                }
             }
 
             // Handle session change notifications to pause background processing
