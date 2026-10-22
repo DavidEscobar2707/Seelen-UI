@@ -1,6 +1,6 @@
 import type { Widget } from "@seelen-ui/lib/types";
 import { _invoke, webviewInfo } from "src/ui/vanilla/entry-point/_tauri.ts";
-import { listen } from "@tauri-apps/api/event";
+import { SeelenEvent, subscribe } from "@seelen-ui/lib";
 
 import { hookLocalStorage } from "src/ui/vanilla/entry-point/_LocalStorage";
 
@@ -16,7 +16,7 @@ if (!window.__SLU_WIDGET) {
 }
 
 // reload if widget definition changed
-listen<Widget[]>("widgets-changed", ({ payload }) => {
+subscribe(SeelenEvent.StateWidgetsChanged, ({ payload }) => {
   const actual = payload.find((widget) => widget.id === currentWidgetId);
   if (actual && JSON.stringify(actual) !== JSON.stringify(window.__SLU_WIDGET)) {
     window.location.reload();

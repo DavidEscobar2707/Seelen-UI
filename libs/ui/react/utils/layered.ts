@@ -1,4 +1,4 @@
-import { SeelenEvent } from "@seelen-ui/lib";
+import { SeelenEvent, subscribe } from "@seelen-ui/lib";
 import { window as TauriWindow } from "@seelen-ui/lib/tauri";
 
 class LayeredHitbox {
@@ -38,7 +38,7 @@ export async function declareDocumentAsLayeredHitbox(
   await window.setIgnoreCursorEvents(true);
   const data = new LayeredHitbox();
 
-  const unlistenMouseMove = await window.listen<[x: number, y: number]>(SeelenEvent.GlobalMouseMove, (event) => {
+  const unlistenMouseMove = await subscribe(SeelenEvent.GlobalMouseMove, (event) => {
     const [mouseX, mouseY] = event.payload;
     const { x: windowX, y: windowY, width: windowWidth, height: windowHeight } = getPhysicalRect();
 

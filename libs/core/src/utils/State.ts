@@ -1,5 +1,4 @@
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
-import { listen as tauriListen, type Options as ListenerOptions } from "@tauri-apps/api/event";
 
 import type {
   AllSeelenCommandArguments,
@@ -9,6 +8,7 @@ import type {
   SeelenEvent,
   UnSubscriber,
 } from "../handlers/mod.ts";
+import { subscribe } from "../handlers/mod.ts";
 
 // deno-lint-ignore no-explicit-any
 interface ConstructorWithSingleArg<T = any> {
@@ -34,13 +34,8 @@ export function newOnEvent<
   cb: (instance: InstanceType<This>) => void,
   Class: This,
   event: Event,
-  options?: ListenerOptions,
 ): Promise<UnSubscriber> {
-  return tauriListen(
-    event,
-    (eventData) => {
-      cb(new Class(eventData.payload as AllSeelenEventPayloads[Event]));
-    },
-    options,
-  );
+  return subscribe(event, (eventData) => {
+    cb(new Class(eventData.payload as AllSeelenEventPayloads[Event]));
+  });
 }

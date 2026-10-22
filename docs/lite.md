@@ -169,3 +169,8 @@ Notes: an `AppOrFile` without `umid` (or whose path is a `.lnk`) is dropped on l
   can no longer be shown/moved/focused (calls just fail and log). Autostart is `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` value `SeelenLite`
   (`set_auto_start`/`get_auto_start_status`); the old `\Seelen\Seelen UI Service` task is never read or touched. NSIS/AppX templates and
   `scripts/bundle.msix.ts` still mention `slu-service.exe` (bundling is not used by the fork; fix before building an installer).
+- Single event transport: `emit_to_webviews` only publishes on the events websocket hub (the tauri `emit_str` broadcast is gone). `__unsafe_tauri_subscribe`
+  removed from `libs/core`; `newOnEvent` (State.ts), `layered.ts` (GlobalMouseMove) and the `MainSetup.ts` widget-reload listener now use `subscribe`.
+  Per-webview tauri events stay (`WidgetTriggered`, liveness ping, context-menu callbacks). The salvo `oapi` feature stays: `seelen-core` types derive
+  `ToSchema` under the `salvo` feature and the `/ping`/themes endpoints use it; dropping it is a separate refactor (the Scalar page is served from
+  an embedded 1-file html, no extra dependency).

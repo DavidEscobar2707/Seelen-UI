@@ -1,6 +1,6 @@
 import type { SeelenEventPayload, SluCmdArgumentMap, SluCmdReturnMap } from "@seelen-ui/types";
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
-import { type EventCallback, listen, type Options as ListenerOptions } from "@tauri-apps/api/event";
+import type { EventCallback } from "@tauri-apps/api/event";
 
 import { SeelenCommand } from "./commands.ts";
 import { SeelenEvent } from "./events.ts";
@@ -48,15 +48,6 @@ export function subscribe<T extends SeelenEvent>(
   cb: EventCallback<AllSeelenEventPayloads[T]>,
 ): Promise<UnSubscriber> {
   return getEventsChannel().subscribe(event, cb as EventCallback<unknown>);
-}
-
-/** Events in tauri causes memory leaks, so we use websockets instead */
-export function __unsafe_tauri_subscribe<T extends SeelenEvent>(
-  event: T,
-  cb: EventCallback<AllSeelenEventPayloads[T]>,
-  options?: ListenerOptions,
-): Promise<UnSubscriber> {
-  return listen(event, cb, options);
 }
 
 export { SeelenCommand, SeelenEvent };

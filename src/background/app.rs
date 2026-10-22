@@ -1,6 +1,6 @@
 use std::sync::atomic::Ordering;
 
-use tauri::{AppHandle, Emitter, Wry};
+use tauri::{AppHandle, Wry};
 use winreg::{RegKey, enums::HKEY_CURRENT_USER};
 
 use crate::{
@@ -33,7 +33,6 @@ where
         return;
     }
 
-    // serialized once and shared by both transports
     let payload = match serde_json::to_string(&payload) {
         Ok(payload) => payload,
         Err(err) => {
@@ -42,9 +41,8 @@ where
         }
     };
 
+    // single transport: the events websocket hub (tauri events leak memory, see libs/core handlers)
     crate::server::events::EVENTS_HUB.publish(event, &payload);
-    // kept for backward compatibility with widgets listening via the tauri api
-    get_app_handle().emit_str(event, payload).log_error();
 }
 
 pub struct SeelenUI {}
