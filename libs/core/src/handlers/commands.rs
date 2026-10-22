@@ -200,11 +200,6 @@ slu_commands_declaration! {
         @fallible()
         show_desktop(),
 
-    RequestToUserInputShortcut =
-        @async()
-        @fallible()
-        request_to_user_input_shortcut() -> Option<Vec<String>>,
-
     // System
     SystemGetMonitors = get_connected_monitors() -> Vec<PhysicalMonitor>,
     SetMonitorHdr =
@@ -318,10 +313,6 @@ slu_commands_declaration! {
         @webview()
         @fallible()
         trigger_context_menu(menu: ContextMenu, forward_to: Option<String>),
-    TriggerDialog =
-        @webview()
-        @fallible()
-        trigger_dialog(dialog: Dialog),
     SetCurrentWidgetStatus =
         @webview()
         @fallible()

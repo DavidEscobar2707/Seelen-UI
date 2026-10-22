@@ -2,7 +2,6 @@ pub mod cli;
 pub mod loader;
 pub mod manager;
 pub mod permissions;
-pub mod popups;
 pub mod toolbar;
 pub mod webview;
 pub mod weg;
@@ -17,8 +16,8 @@ use seelen_core::{
     handlers::SeelenEvent,
     resource::ResourceId,
     state::{
-        Alignment, WidgetDebugInfo, WidgetInstanceMode, WidgetStatus, WidgetTriggerPayload,
-        context_menu::ContextMenu, dialog::Dialog,
+        WidgetDebugInfo, WidgetInstanceMode, WidgetStatus, WidgetTriggerPayload,
+        context_menu::ContextMenu,
     },
     system_state::{AppBarEdge, ZOrder},
 };
@@ -115,18 +114,6 @@ fn trigger_widget_inner(
 
     get_app_handle().emit_to(label.raw, SeelenEvent::WidgetTriggered, &payload)?;
     Ok(())
-}
-
-/// Trigger a dialog from backend code (no owner webview; button events are emitted globally).
-pub fn trigger_dialog_backend(dialog: Dialog) -> Result<()> {
-    let mut payload = WidgetTriggerPayload::new("@seelen/dialog".into());
-    payload.instance_id = Some(dialog.identifier);
-    payload.align_x = Some(Alignment::Center);
-    payload.align_y = Some(Alignment::Center);
-
-    payload.add_custom_arg("dialog", serde_json::to_value(&dialog)?);
-
-    trigger_widget_inner(payload, None)
 }
 
 /// The settings app was removed in the lite fork: everything that used to open it opens the
@@ -235,20 +222,6 @@ impl crate::tauri_handlers::Handlers {
             "forwardTo",
             serde_json::to_value(forward_to.unwrap_or(owner.raw))?,
         );
-        trigger_widget_inner(payload, Some(owner_hwnd))
-    }
-
-    /// Trigger a dialog from within a widget (the owner webview is used for event routing).
-    pub fn trigger_dialog(webview: tauri::WebviewWindow, dialog: Dialog) -> Result<()> {
-        let owner = WidgetWebviewLabel::try_from_raw(webview.label())?;
-        let owner_hwnd = webview.hwnd()?.0 as isize;
-
-        let mut payload = WidgetTriggerPayload::new("@seelen/dialog".into());
-        payload.instance_id = Some(dialog.identifier);
-
-        payload.add_custom_arg("dialog", serde_json::to_value(&dialog)?);
-        payload.add_custom_arg("owner", serde_json::to_value(&owner.raw)?);
-
         trigger_widget_inner(payload, Some(owner_hwnd))
     }
 

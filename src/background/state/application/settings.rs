@@ -1,16 +1,14 @@
 use std::path::Path;
 
-use seelen_core::{
-    handlers::SeelenEvent,
-    state::{CssStyles, Dialog, DialogContent, Settings},
-};
+use seelen_core::{handlers::SeelenEvent, state::Settings};
+use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
 
 use crate::{
-    app::{SeelenUI, emit_to_webviews},
+    app::{SeelenUI, emit_to_webviews, get_app_handle},
     error::{Result, ResultLogExt},
     resources::ResourceManager,
     utils::constants::SEELEN_COMMON,
-    widgets::{manager::WIDGET_MANAGER, trigger_dialog_backend},
+    widgets::manager::WIDGET_MANAGER,
 };
 
 use super::AppSettings;
@@ -133,39 +131,18 @@ impl AppSettings {
 }
 
 fn show_corrupted_state_to_user(path: &Path) {
-    let path = path.to_path_buf();
+    let body = format!(
+        "{}\n{}: {:?}",
+        t!("runtime.corrupted_file"),
+        t!("runtime.corrupted_file_path"),
+        path
+    );
     std::thread::spawn(move || {
-        let dialog = Dialog {
-            title: vec![DialogContent::Group {
-                items: vec![
-                    DialogContent::Icon {
-                        name: "BiSolidError".to_string(),
-                        styles: Some(
-                            CssStyles::new()
-                                .add("color", "var(--color-red-800)")
-                                .add("height", "1.2rem"),
-                        ),
-                    },
-                    DialogContent::Text {
-                        value: t!("runtime.corrupted_data").to_string(),
-                        styles: None,
-                    },
-                ],
-                styles: Some(CssStyles::new().add("alignItems", "center")),
-            }],
-            content: vec![
-                DialogContent::Text {
-                    value: t!("runtime.corrupted_file").to_string(),
-                    styles: None,
-                },
-                DialogContent::Text {
-                    value: format!("{}: {:?}", t!("runtime.corrupted_file_path"), path),
-                    styles: None,
-                },
-            ],
-            ..Default::default()
-        };
-
-        trigger_dialog_backend(dialog).log_error();
+        get_app_handle()
+            .dialog()
+            .message(body)
+            .title(t!("runtime.corrupted_data"))
+            .kind(MessageDialogKind::Error)
+            .blocking_show();
     });
 }

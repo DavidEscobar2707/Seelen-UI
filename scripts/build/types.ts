@@ -12,7 +12,7 @@ export interface BuildContext {
   entryPoints: string[];
 }
 
-export type FrameworkType = "react" | "svelte" | "vanilla";
+export type FrameworkType = "svelte" | "vanilla";
 
 export interface EntryPointInfo {
   path: string;

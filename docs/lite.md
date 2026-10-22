@@ -134,3 +134,8 @@ Notes: an `AppOrFile` without `umid` (or whose path is a `.lnk`) is dropped on l
   in `trigger_widget_inner` and opens the folder too, so those frontends need no change. `slu settings` and the second-launch path
   (`is_already_running`) go through the same function. `set_widget_permissions` is now uncallable (it only accepted the settings app);
   edit permissions in the data dir by hand. See "Configuration".
+- React dialog widget: `src/ui/react/dialog`, `src/static/widgets/dialog`, `trigger_dialog` command, `trigger_dialog_backend`, `Dialog`/`DialogContent` types,
+  the shortcut-conflict popup (now a `log::warn!`), the shortcut-recorder popup (`widgets/popups`, `request_to_user_input_shortcut` command; it only
+  served the settings app; the service-side registration and `slu popup` IPC variants stay, unused). A corrupted `settings.json` now shows a native
+  `tauri_plugin_dialog` message box. No React app remains, so `scripts/build/builders/react.ts` and the react entry discovery are gone
+  (`libs/ui/react` components and the preact/react npm deps stay until the unused-deps step).

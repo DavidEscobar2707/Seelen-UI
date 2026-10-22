@@ -15,10 +15,7 @@ use crate::{
     modules::{start::application::StartMenuManager, user::infrastructure::reemit_user},
     resources::RESOURCES,
     state::application::{AppSettings, FULL_STATE, initialize_user_resources_watcher},
-    widgets::{
-        manager::WIDGET_MANAGER, popups::shortcut_conflicts::show_shortcut_conflict_popup,
-        weg::SeelenWeg,
-    },
+    widgets::{manager::WIDGET_MANAGER, weg::SeelenWeg},
     windows_api::{
         Com,
         event_window::{IS_INTERACTIVE_SESSION, create_background_window},
@@ -118,7 +115,7 @@ impl SeelenUI {
         let widget_refs: Vec<_> = widgets.iter().map(|w| w.as_ref()).collect();
         let (resolved, has_conflicts) = resolve_shortcuts(&state.settings, &widget_refs);
         if has_conflicts {
-            show_shortcut_conflict_popup().log_error();
+            log::warn!("Some configured shortcuts conflict with each other, check settings.json");
         }
         if !crate::cli::shortcuts::SHORTCUTS_PAUSED.load(std::sync::atomic::Ordering::Acquire) {
             ServicePipe::request(SvcAction::SetShortcuts(resolved))?;

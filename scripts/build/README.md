@@ -11,7 +11,6 @@ scripts/build/
 ├── types.ts            # TypeScript type definitions
 ├── server.ts           # Development server
 ├── builders/           # Framework-specific builders
-│   ├── react.ts        # React/Preact build configuration
 │   └── svelte.ts       # Svelte build configuration
 ├── plugins/            # Custom esbuild plugins
 │   └── index.ts        # Copy public files plugin
@@ -29,18 +28,10 @@ The build process is orchestrated by `scripts/build.ts` and follows these steps:
 2. **Extract Icons** - Extract SVG icons from react-icons package (once)
 3. **Clean Dist** - Remove old build artifacts (preserves icons)
 4. **Discover Entry Points** - Find all application entry points
-5. **Build React** - Bundle React/Preact applications
-6. **Build Svelte** - Bundle Svelte applications
-7. **Start Server** - Start development server (if `--serve` flag)
+5. **Build Svelte / Vanilla** - Bundle Svelte and vanilla applications
+6. **Start Server** - Start development server (if `--serve` flag)
 
 ## Framework Support
-
-### React/Preact
-
-- Entry point: `src/ui/{app}/index.tsx`
-- Uses Preact as a drop-in replacement for React
-- Supports CSS Modules with camelCase conversion
-- Configuration: `builders/react.ts`
 
 ### Svelte
 
@@ -51,7 +42,6 @@ The build process is orchestrated by `scripts/build.ts` and follows these steps:
 ### Vanilla TypeScript
 
 - Entry point: `src/ui/{app}/index.ts`
-- Bundled with React build configuration
 - No framework overhead
 
 ## Adding New Frameworks

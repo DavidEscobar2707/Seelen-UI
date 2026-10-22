@@ -5,7 +5,6 @@ import { parseArgs } from "./build/config.ts";
 import { extractIcons } from "./build/steps/icons.ts";
 import { cleanDist } from "./build/steps/cleanup.ts";
 import { discoverEntryPoints, groupEntryPointsByFramework } from "./build/steps/discover.ts";
-import { buildReact } from "./build/builders/react.ts";
 import { buildSvelte } from "./build/builders/svelte.ts";
 import { buildVanilla } from "./build/builders/vanilla.ts";
 import { startDevServer } from "./build/server.ts";
@@ -18,7 +17,7 @@ import process from "node:process";
  * 2. Extract icons (in parallel with cleaning)
  * 3. Clean dist directory (in parallel with icons)
  * 4. Discover entry points
- * 5. Build all frameworks in parallel (React, Svelte, Vanilla)
+ * 5. Build all frameworks in parallel (Svelte, Vanilla)
  * 6. Start dev server (if --serve flag is set) - serves the entire dist folder
  */
 async function main() {
@@ -37,7 +36,6 @@ async function main() {
   const groupedEntryPoints = groupEntryPointsByFramework(entryPoints);
 
   console.info(`\nDiscovered entry points:`);
-  console.info(`  React: ${groupedEntryPoints.react.length}`);
   console.info(`  Svelte: ${groupedEntryPoints.svelte.length}`);
   console.info(`  Vanilla: ${groupedEntryPoints.vanilla.length}`);
   console.info();
@@ -49,7 +47,6 @@ async function main() {
   console.time("Total build time");
 
   await Promise.all([
-    buildReact(groupedEntryPoints.react, allAppFolders, args),
     buildSvelte(groupedEntryPoints.svelte, allAppFolders, args),
     buildVanilla(groupedEntryPoints.vanilla, allAppFolders, args),
   ]);
