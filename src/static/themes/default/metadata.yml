@@ -11,6 +11,15 @@ styles:
   # as friendly ids are not stable.
   "@seelen/fancy-toolbar": !include styles/fancy-toolbar.scss
   "@seelen/weg": !include styles/weg.scss
+  "@seelen/power-menu": !include styles/power-menu.scss
+  "@seelen/system-tray": !include styles/tray-menu.scss
+  "@seelen/quick-settings": !include styles/quick-settings.scss
+  "@seelen/bluetooth-popup": !include styles/bluetooth-popup.scss
+  "@seelen/keyboard-selector": !include styles/keyboard-selector.scss
+  "@seelen/network-popup": !include styles/network-popup.scss
+  "@seelen/calendar-popup": !include styles/calendar-popup.scss
+  "@seelen/media-popup": !include styles/media-popup.scss
+  "@seelen/notifications": !include styles/notifications.scss
   "@seelen/context-menu": !include styles/context-menu.scss
   "@seelen/tooltip": !include styles/tooltip.scss
 

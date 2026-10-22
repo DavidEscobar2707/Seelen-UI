@@ -45,5 +45,13 @@ async function completeTranslationsFor(localesDir: string) {
 
 await completeTranslationsFor("src/ui/svelte/weg/i18n/translations");
 await completeTranslationsFor("src/ui/svelte/fancy-toolbar/i18n/translations");
+await completeTranslationsFor("src/ui/svelte/power-menu/i18n/translations");
+await completeTranslationsFor("src/ui/svelte/bluetooth-popup/i18n/translations");
+await completeTranslationsFor("src/ui/svelte/network-popup/i18n/translations");
+await completeTranslationsFor("src/ui/svelte/quick-settings/i18n/translations");
+await completeTranslationsFor("src/ui/svelte/keyboard-selector/i18n/translations");
+await completeTranslationsFor("src/ui/svelte/calendar-popup/i18n/translations");
+await completeTranslationsFor("src/ui/svelte/media-popup/i18n/translations");
+await completeTranslationsFor("src/ui/svelte/notifications/i18n/translations");
 
 await completeTranslationsFor("src/background/i18n");
