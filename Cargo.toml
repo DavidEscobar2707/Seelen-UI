@@ -9,7 +9,7 @@ inherits = "dev"
 debug = false
 
 [profile.release]
-debug = "limited"
+debug = false
 strip = true
 opt-level = "z"
 lto = true
