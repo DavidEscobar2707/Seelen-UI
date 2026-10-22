@@ -15,7 +15,6 @@ use crate::{
     modules::{start::application::StartMenuManager, user::infrastructure::reemit_user},
     resources::RESOURCES,
     state::application::{AppSettings, FULL_STATE, initialize_user_resources_watcher},
-    utils::discord::{start_discord_rpc, update_discord_rpc},
     widgets::{
         manager::WIDGET_MANAGER, popups::shortcut_conflicts::show_shortcut_conflict_popup,
         weg::SeelenWeg,
@@ -99,8 +98,6 @@ impl SeelenUI {
         create_background_window()?;
         register_win_hook()?;
 
-        start_discord_rpc()?;
-
         initialize_user_resources_watcher()?;
 
         let widgets = RESOURCES.widgets();
@@ -115,7 +112,6 @@ impl SeelenUI {
     }
 
     pub fn on_settings_change(state: &AppSettings) -> Result<()> {
-        update_discord_rpc(state.settings.drpc).log_error();
         rust_i18n::set_locale(state.locale());
 
         let widgets = RESOURCES.widgets();

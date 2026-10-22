@@ -55,3 +55,5 @@ One removal per commit, so each one can be reverted alone.
   commands `get_seelen_session` / `seelen_login` / `seelen_logout` / `get_backup_status`, events `session::changed` / `backup::status-changed`,
   `SeelenSession` / `BackupStatus` types, session UI in the settings app. Premium-resource filtering in `resources/emitters.rs` is gone (no
   account, so every resource on disk is listed). `backup_sync_enabled` stays in settings types (data only).
+- Discord rich presence: `src/background/utils/discord.rs`, `discord-rich-presence` dependency, its start/update calls in `app.rs`, the toggle in
+  the settings app. `drpc` stays in settings types (data only).

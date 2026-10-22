@@ -1,5 +1,4 @@
 pub mod constants;
-pub mod discord;
 pub mod icon_extractor;
 pub mod integrity;
 pub mod lock_free;
@@ -14,7 +13,6 @@ use std::{
     io::Write,
     path::{Path, PathBuf},
     sync::atomic::{AtomicU64, Ordering},
-    time::{SystemTime, UNIX_EPOCH},
 };
 
 use windows::{
@@ -116,14 +114,6 @@ pub fn convert_file_to_src(path: &Path) -> String {
         .to_string();
     let encoded = urlencoding::encode(&path);
     format!("{base}{encoded}")
-}
-
-pub fn now_timestamp_as_millis() -> u64 {
-    let start = SystemTime::now();
-    let since_the_epoch = start
-        .duration_since(UNIX_EPOCH)
-        .expect("Time went backwards");
-    since_the_epoch.as_secs() * 1000 + since_the_epoch.subsec_nanos() as u64 / 1_000_000
 }
 
 pub fn date_based_hex_id() -> String {

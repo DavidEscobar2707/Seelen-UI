@@ -70,7 +70,6 @@ fern = { workspace = true }
 reqwest = { workspace = true }
 rand = { workspace = true }
 rustfft = { workspace = true }
-discord-rich-presence = { workspace = true }
 win-hotkeys = { workspace = true }
 walkdir = { workspace = true }
 tokio = { workspace = true, features = ["process"] }
