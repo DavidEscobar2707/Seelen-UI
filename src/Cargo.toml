@@ -63,7 +63,6 @@ rusqlite = { workspace = true, features = ["bundled"] }
 backtrace = { workspace = true }
 owo-colors = { workspace = true }
 rust-i18n = { workspace = true }
-url = { workspace = true }
 urlencoding = { workspace = true }
 fern = { workspace = true }
 reqwest = { workspace = true }
@@ -184,7 +183,6 @@ windows = { workspace = true, features = [
 ] }
 time = { workspace = true, features = ["formatting", "local-offset"] }
 scc = { workspace = true }
-open = "5.3.3"
 futures = { workspace = true }
 salvo = { workspace = true, features = ["oapi", "websocket"] }
 

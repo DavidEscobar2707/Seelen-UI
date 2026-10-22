@@ -8,7 +8,6 @@ rust-version = "1.97"
 workspace = true
 
 [dependencies]
-slu-macros = { workspace = true }
 serde = { workspace = true, features = ["derive", "rc"] }
 serde_json = { workspace = true }
 serde_path_to_error = { workspace = true }
@@ -32,7 +31,6 @@ tokio = { workspace = true, features = ["fs", "io-util", "rt", "macros"] }
 futures = { workspace = true }
 num_enum = "0.7.6"
 chrono = { version = "0.4.43", features = ["serde"] }
-paste = "1.0.15"
 salvo = { workspace = true, features = ["oapi"], optional = true }
 
 [features]

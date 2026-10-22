@@ -154,3 +154,10 @@ Notes: an `AppOrFile` without `umid` (or whose path is a `.lnk`) is dropped on l
   looks for the widget), `flyouts` (volume/brightness OSD), `user-menu` (`user` bundle), plugins `weg_default_power` and `weg_show_desktop`, theme
   `src/static/themes/bubbles`, leftover `Notification.svelte`, translate-script lines. The dock default items drop the show-desktop button; an existing
   `state.yml` that still lists a removed plugin just renders nothing for that slot. `get_start_menu_items`/`get_native_start_menu` commands stay (backend).
+- Unused dependencies: Rust `url` and `open` (src), `paste` and `slu-macros` (libs/core); `tao` stays (it is a `[patch.crates-io]` git source, not a dependency).
+  `reqwest` stays: `slu resource translate` (dev CLI) uses it. npm: dead React helper code `libs/ui/react/{components,utils/*}` (only `utils/index.ts` and
+  `utils/layered.ts` are used by the dock) was deleted, then removed from package.json/package-lock: `@dnd-kit/react`, `@preact/compat`, `@preact/signals`, `preact`,
+  `preact-render-to-string`, `react-router`, `react-i18next`, `i18next`, `antd`, `framer-motion`, `qrcode`, `@types/qrcode`, `flexsearch`, `unified`, `remark-gfm`,
+  `remark-parse`, `remark-rehype`, `rehype-stringify`, `esbuild-css-modules-plugin`, `@types/react-dom`. Done with `npm uninstall --package-lock-only` so the shared
+  `node_modules` junction (main checkout, baseline build) is not modified; run `npm install`/`npm ci` here to prune it. `react-icons` + `real-react-dom` stay (icon
+  extraction step). `tsconfig.json` drops the preact JSX/paths config. `windows` crate features were not touched.
