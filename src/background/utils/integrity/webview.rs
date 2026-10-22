@@ -84,14 +84,22 @@ pub async fn check_for_webview_optimal_state() -> bool {
         Result::Ok(())
     });
 
+    // Only a failed webview build (sender dropped) is fatal. A slow start on a busy machine is not:
+    // upstream exited the whole app after 3 s, which aborted startup under load.
     tokio::select! {
-        _ = rx => {
-            log::info!("Webview optimal state confirmed.");
+        result = rx => match result {
+            Ok(()) => {
+                log::info!("Webview optimal state confirmed.");
+                true
+            }
+            Err(_) => {
+                log::error!("Webview optimal state check failed: test webview could not be created.");
+                false
+            }
+        },
+        _ = tokio::time::sleep(std::time::Duration::from_secs(20)) => {
+            log::warn!("Webview optimal state check still pending after 20s, continuing startup.");
             true
-        }
-        _ = tokio::time::sleep(std::time::Duration::from_secs(3)) => {
-            log::error!("Webview optimal state check timed out.");
-            false
         }
     }
 }
