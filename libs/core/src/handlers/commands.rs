@@ -595,26 +595,6 @@ slu_commands_declaration! {
     // Cloud Backup
     GetBackupStatus = get_backup_status() -> BackupStatus,
 
-    // Clipboard
-    ClipboardGetData = clipboard_get_data() -> ClipboardData,
-    ClipboardDeleteEntry =
-        @fallible()
-        clipboard_delete_entry(id: String),
-    ClipboardClearHistory =
-        @fallible()
-        clipboard_clear_history(),
-    ClipboardSetContent =
-        @fallible()
-        clipboard_set_content(id: String),
-    ClipboardPaste =
-        @fallible()
-        clipboard_paste(id: String, plain: bool),
-    ClipboardPinEntry =
-        @fallible()
-        clipboard_pin_entry(id: String),
-    ClipboardUnpinEntry =
-        @fallible()
-        clipboard_unpin_entry(id: String),
 
     // Fonts
     GetFonts =

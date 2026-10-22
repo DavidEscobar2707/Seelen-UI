@@ -48,7 +48,6 @@ export enum SeelenEvent {
   TrashBinChanged = "trash-bin::changed",
   SeelenSessionChanged = "session::changed",
   SeelenBackupStatusChanged = "backup::status-changed",
-  ClipboardDataChanged = "clipboard::data-changed",
   FocusAssistChanged = "focus-assist::changed",
   NotificationsModeChanged = "notifications::mode-changed",
   Notifications = "notifications",

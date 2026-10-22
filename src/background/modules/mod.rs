@@ -1,5 +1,4 @@
 pub mod apps;
-pub mod clipboard;
 pub mod focus_assist;
 pub mod fonts;
 pub mod media;

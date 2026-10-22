@@ -143,8 +143,6 @@ slu_events_declaration! {
     // Cloud Backup
     SeelenBackupStatusChanged(BackupStatus) as "backup::status-changed",
 
-    // Clipboard
-    ClipboardDataChanged(ClipboardData) as "clipboard::data-changed",
 
     // Notifications
     FocusAssistChanged(bool) as "focus-assist::changed",
