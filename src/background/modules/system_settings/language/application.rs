@@ -29,11 +29,15 @@ use windows::{
 };
 use winreg::{RegKey, enums::HKEY_LOCAL_MACHINE};
 
+use seelen_core::handlers::SeelenEvent;
+
 use crate::{
     error::{Result, ResultLogExt},
     event_manager,
+    hook::HookManager,
+    server::events::EVENTS_HUB,
     utils::{lock_free::SyncVec, spawn_named_thread},
-    windows_api::{Com, WindowsApi, string_utils::WindowsString},
+    windows_api::{Com, WindowsApi, string_utils::WindowsString, window::event::WinEvent},
 };
 
 #[allow(clippy::upper_case_acronyms)]
@@ -85,40 +89,80 @@ impl LanguageManager {
         });
         Self::set_event_handler_priority(&eid, 1);
 
-        spawn_named_thread("Input Profile Monitor", || {
-            let mut hkl = Self::get_active_hkl();
-            let mut active_tip = Self::get_active_tip().unwrap_or_default();
-            let mut ime = Self::get_ime_state().unwrap_or_default();
+        // Windows has no global notification for per-thread layout/TIP/IME changes of other
+        // processes (WM_INPUTLANGCHANGE only reaches the window itself), so a switch inside the
+        // same foreground window can only be seen by looking. Compromise:
+        // - checks run only while a webview listens to the language/IME events,
+        // - checked right away on foreground / IME win events (the common triggers),
+        // - plus a 2 s safety poll while somebody listens, skipped while the idle flag is set.
+        HookManager::subscribe(|(event, _origin)| {
+            if matches!(
+                event,
+                WinEvent::SystemForeground
+                    | WinEvent::ObjectImeChange
+                    | WinEvent::ObjectImeShow
+                    | WinEvent::ObjectImeHide
+            ) && Self::has_listeners()
+                && !crate::utils::idle::is_paused()
+            {
+                Self::check_changes();
+            }
+        });
 
+        spawn_named_thread("Input Profile Monitor", || {
             loop {
-                // No Windows notification covers per-thread layout/TIP/IME changes of other processes,
-                // so this stays a poll: 2 s and skipped while the shared idle pause flag is set.
+                if !Self::has_listeners() {
+                    // blocks until a webview subscribes
+                    EVENTS_HUB.wait_for_listeners_change(std::time::Duration::from_secs(3600));
+                    continue;
+                }
                 std::thread::sleep(std::time::Duration::from_secs(2));
                 if crate::utils::idle::is_paused() {
                     continue;
                 }
-
-                let current_tip = Self::get_active_tip().unwrap_or_default();
-                let current_hkl = Self::get_active_hkl();
-                if hkl != current_hkl || active_tip != current_tip {
-                    log::debug!(
-                        "Language changed: {hkl:?} -> {current_hkl:?} | {active_tip} -> {current_tip}"
-                    );
-                    active_tip = current_tip;
-                    hkl = current_hkl;
-                    Self::send(LanguageEvent::LayoutChanged);
-                }
-
-                let current_ime = Self::get_ime_state().unwrap_or_default();
-                if ime != current_ime {
-                    log::debug!("IME status changed: {ime:?} -> {current_ime:?}");
-                    ime = current_ime;
-                    Self::send(LanguageEvent::ImeChanged);
-                }
+                Self::check_changes();
             }
         });
 
         Ok(())
+    }
+
+    fn has_listeners() -> bool {
+        EVENTS_HUB.has_listeners(SeelenEvent::SystemLanguagesChanged.as_ref())
+            || EVENTS_HUB.has_listeners(SeelenEvent::SystemImeStateChanged.as_ref())
+    }
+
+    /// Compares the active layout / TIP / IME state with the last seen one and emits changes.
+    fn check_changes() {
+        static LAST: LazyLock<parking_lot::Mutex<(isize, String, ImeState)>> =
+            LazyLock::new(|| {
+                parking_lot::Mutex::new((
+                    LanguageManager::get_active_hkl().0 as isize,
+                    LanguageManager::get_active_tip().unwrap_or_default(),
+                    LanguageManager::get_ime_state().unwrap_or_default(),
+                ))
+            });
+        let mut last = LAST.lock();
+
+        let current_tip = Self::get_active_tip().unwrap_or_default();
+        let current_hkl = Self::get_active_hkl().0 as isize;
+        if last.0 != current_hkl || last.1 != current_tip {
+            log::debug!(
+                "Language changed: {:?} -> {current_hkl:?} | {} -> {current_tip}",
+                last.0,
+                last.1
+            );
+            last.0 = current_hkl;
+            last.1 = current_tip;
+            Self::send(LanguageEvent::LayoutChanged);
+        }
+
+        let current_ime = Self::get_ime_state().unwrap_or_default();
+        if last.2 != current_ime {
+            log::debug!("IME status changed: {:?} -> {current_ime:?}", last.2);
+            last.2 = current_ime;
+            Self::send(LanguageEvent::ImeChanged);
+        }
     }
 
     // ── TSF helpers ──────────────────────────────────────────────────────────
