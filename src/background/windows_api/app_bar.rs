@@ -3,8 +3,8 @@ use std::sync::LazyLock;
 use windows::Win32::{
     Foundation::{HWND, LPARAM, RECT},
     UI::Shell::{
-        ABE_BOTTOM, ABE_LEFT, ABE_RIGHT, ABE_TOP, ABM_NEW, ABM_REMOVE, ABM_SETPOS, ABM_SETSTATE,
-        ABS_ALWAYSONTOP, ABS_AUTOHIDE, APPBARDATA, SHAppBarMessage,
+        ABE_BOTTOM, ABE_LEFT, ABE_RIGHT, ABE_TOP, ABM_GETSTATE, ABM_NEW, ABM_REMOVE, ABM_SETPOS,
+        ABM_SETSTATE, ABS_ALWAYSONTOP, ABS_AUTOHIDE, APPBARDATA, SHAppBarMessage,
     },
 };
 
@@ -56,6 +56,12 @@ impl AppBarData {
         let mut data = self.0;
         data.lParam = state.into();
         unsafe { SHAppBarMessage(ABM_SETSTATE, &mut data) };
+    }
+
+    /// Current AppBar state flags of the shell taskbar (0 normal, 1 autohide, 2 always on top, 3 both).
+    pub fn get_state(&self) -> u32 {
+        let mut data = self.0;
+        (unsafe { SHAppBarMessage(ABM_GETSTATE, &mut data) } as u32) & 3
     }
 
     pub fn set_edge(&mut self, edge: AppBarEdge) {

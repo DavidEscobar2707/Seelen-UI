@@ -4,6 +4,7 @@ pub mod common;
 pub mod error;
 pub mod messages;
 pub mod security;
+pub mod taskbar_watchdog;
 
 // Re-export main types for convenience
 pub use app::AppIpc;

@@ -1,25 +1,111 @@
 use std::{
     collections::HashSet,
     path::{Path, PathBuf},
-    sync::atomic::{AtomicBool, Ordering},
+    sync::atomic::{AtomicBool, AtomicU32, Ordering},
 };
 
 use seelen_core::state::WegItemData;
 use seelen_core::system_state::RelaunchArguments;
 use windows::Win32::{
     Foundation::HWND,
-    UI::WindowsAndMessaging::{SW_HIDE, SW_SHOWNORMAL},
+    UI::{
+        Shell::ABS_ALWAYSONTOP,
+        WindowsAndMessaging::{SW_HIDE, SW_SHOWNORMAL},
+    },
 };
 use winreg::{RegKey, enums::HKEY_CURRENT_USER};
 
 use crate::{
     error::Result,
+    utils::constants::SEELEN_COMMON,
     windows_api::{AppBarData, AppBarDataState, WindowEnumerator, WindowsApi},
 };
 
 /// Tracks whether we hid the native taskbar, so we only restore what we hid
 /// (hiding Shell_TrayWnd does not need elevation, so the app does it directly).
 static NATIVE_TASKBAR_HIDDEN: AtomicBool = AtomicBool::new(false);
+/// AppBar state the taskbar had before we touched it, restored everywhere (never hardcoded).
+static ORIGINAL_STATE: AtomicU32 = AtomicU32::new(ABS_ALWAYSONTOP);
+/// The watchdog process is spawned once per app process; it outlives hide/restore cycles.
+static WATCHDOG_SPAWNED: AtomicBool = AtomicBool::new(false);
+
+const STATE_FILE: &str = "taskbar-state.txt";
+
+fn state_file() -> PathBuf {
+    SEELEN_COMMON.app_data_dir().join(STATE_FILE)
+}
+
+fn show_taskbars_with_state(state: u32) -> Result<()> {
+    for hwnd in get_taskbars_handles()? {
+        AppBarData::from_handle(hwnd).set_state(AppBarDataState::from(state));
+        WindowsApi::show_window_async(hwnd, SW_SHOWNORMAL)?;
+    }
+    Ok(())
+}
+
+/// A previous instance died hard (and its watchdog too): restore from the file it left.
+/// Call before hiding the taskbar on startup.
+pub fn restore_after_previous_crash() {
+    let file = state_file();
+    if let Some((pid, state)) = slu_ipc::taskbar_watchdog::read_state_file(&file) {
+        log::warn!("Found a stale taskbar state file (pid {pid}), restoring state {state}");
+        if let Err(err) = show_taskbars_with_state(state) {
+            log::error!("Failed to restore taskbar after previous crash: {err:?}");
+        }
+    }
+    let _ = std::fs::remove_file(file);
+}
+
+/// Records the original state, persists it and starts the watchdog (once).
+fn arm_watchdog() {
+    let handles = get_taskbars_handles().unwrap_or_default();
+    if let Some(hwnd) = handles.first() {
+        ORIGINAL_STATE.store(
+            AppBarData::from_handle(*hwnd).get_state(),
+            Ordering::Release,
+        );
+    }
+    let state = ORIGINAL_STATE.load(Ordering::Acquire);
+    let pid = std::process::id();
+    let file = state_file();
+    if let Err(err) = std::fs::write(&file, slu_ipc::taskbar_watchdog::format_state(pid, state)) {
+        log::error!("Failed to write taskbar state file: {err}");
+        return;
+    }
+    if WATCHDOG_SPAWNED.swap(true, Ordering::AcqRel) {
+        return;
+    }
+    let Some(slu) = std::env::current_exe()
+        .ok()
+        .and_then(|exe| exe.parent().map(|dir| dir.join("slu.exe")))
+        .filter(|p| p.exists())
+    else {
+        log::warn!("slu.exe not found next to the app, taskbar watchdog disabled");
+        WATCHDOG_SPAWNED.store(false, Ordering::Release);
+        return;
+    };
+    let spawn = |flags: u32| {
+        use std::os::windows::process::CommandExt;
+        std::process::Command::new(&slu)
+            .args(["taskbar-watchdog", "--pid", &pid.to_string()])
+            .args(["--state", &state.to_string()])
+            .arg("--file")
+            .arg(&file)
+            .creation_flags(flags)
+            .stdin(std::process::Stdio::null())
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .spawn()
+    };
+    // CREATE_NO_WINDOW | CREATE_BREAKAWAY_FROM_JOB, falling back when the job forbids breakaway
+    match spawn(0x0800_0000 | 0x0100_0000).or_else(|_| spawn(0x0800_0000)) {
+        Ok(child) => log::info!("Taskbar watchdog started (pid {})", child.id()),
+        Err(err) => {
+            log::error!("Failed to start taskbar watchdog: {err}");
+            WATCHDOG_SPAWNED.store(false, Ordering::Release);
+        }
+    }
+}
 
 pub fn get_taskbars_handles() -> Result<Vec<HWND>> {
     let mut founds = Vec::new();
@@ -36,7 +122,11 @@ pub fn get_taskbars_handles() -> Result<Vec<HWND>> {
 }
 
 pub fn hide_native_taskbar() {
-    NATIVE_TASKBAR_HIDDEN.store(true, Ordering::Release);
+    // the state is only read on the first hide, later calls (taskbar re-created / shown) would
+    // read our own AutoHide
+    if !NATIVE_TASKBAR_HIDDEN.swap(true, Ordering::AcqRel) {
+        arm_watchdog();
+    }
     std::thread::spawn(|| match get_taskbars_handles() {
         Ok(handles) => {
             let mut attempts = 0;
@@ -62,11 +152,9 @@ pub fn restore_native_taskbar() -> Result<()> {
         return Ok(());
     }
 
-    for hwnd in get_taskbars_handles()? {
-        AppBarData::from_handle(hwnd).set_state(AppBarDataState::AlwaysOnTop);
-        WindowsApi::show_window_async(hwnd, SW_SHOWNORMAL)?;
-    }
-    Ok(())
+    // clean exit: the watchdog sees no state file and does nothing
+    let _ = std::fs::remove_file(state_file());
+    show_taskbars_with_state(ORIGINAL_STATE.load(Ordering::Acquire))
 }
 
 /// Extracts the list of apps currently pinned to the native Windows taskbar.

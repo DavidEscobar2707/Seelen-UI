@@ -107,6 +107,7 @@ impl SeelenUI {
         rust_i18n::set_locale(state.locale());
 
         if state.is_weg_enabled() {
+            crate::widgets::weg::native_taskbar::restore_after_previous_crash();
             SeelenWeg::hide_native_taskbar();
         }
 

@@ -10,10 +10,23 @@ use slu_ipc::{
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let cli = AppCli::parse();
 
+    // the watchdog just blocks on a process handle: no async runtime (keeps it a tiny process)
+    if let AppCommand::TaskbarWatchdog(cmd) = &cli.command {
+        slu_ipc::taskbar_watchdog::run(cmd.pid, cmd.state, &cmd.file);
+        return;
+    }
+
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .expect("failed to build runtime");
+    rt.block_on(async_main(cli));
+}
+
+async fn async_main(cli: AppCli) {
     if cli.verbose {
         println!("Received args: {:#?}", std::env::args().collect::<Vec<_>>());
         println!("Parsed CLI: {cli:#?}");

@@ -43,12 +43,29 @@ pub enum AppCommand {
     Art(ArtCli),
     /// Toggle the global shortcuts pause state
     ToggleShortcutsPause,
+    /// Internal: waits for the app process and restores the native taskbar if it died without
+    /// a clean exit. Spawned by the app, not meant to be run by hand.
+    #[command(hide = true)]
+    TaskbarWatchdog(TaskbarWatchdogCli),
+}
+
+#[derive(Debug, Serialize, Deserialize, clap::Args)]
+pub struct TaskbarWatchdogCli {
+    /// pid of the app process to wait for
+    #[arg(long)]
+    pub pid: u32,
+    /// AppBar state to restore (ABM_GETSTATE value saved before hiding)
+    #[arg(long)]
+    pub state: u32,
+    /// state file the app deletes on clean exit
+    #[arg(long)]
+    pub file: PathBuf,
 }
 
 impl SluCliCommand for AppCommand {
     fn execution_mode(&self) -> CommandExecutionMode {
         match self {
-            AppCommand::Art(_) => CommandExecutionMode::Direct,
+            AppCommand::Art(_) | AppCommand::TaskbarWatchdog(_) => CommandExecutionMode::Direct,
             AppCommand::Resource(r) => r.execution_mode(),
             _ => CommandExecutionMode::MainInstance,
         }
