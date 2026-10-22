@@ -329,3 +329,9 @@ Found and fixed during these tests: taskbar left in auto-hide after a hard kill 
 admin rights, no service, no scheduled task. The installer sets autostart in
 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` (`SeelenLite`); the uninstaller removes it. Config stays in
 `%APPDATA%\com.seelen.seelen-ui`.
+
+## 1-hour soak (installed build, 16:44-17:45, desktop in normal use)
+
+`docs/soak-phase2.csv`. The app stayed up for the full hour (no exit). seelen-ui private 56 -> 64 MB (flat after
+~10 min), webview private 129-164 MB (no upward trend), 6 processes throughout, CPU 0.05-0.40 % per 5-minute window
+while David was working (not an idle desktop).
