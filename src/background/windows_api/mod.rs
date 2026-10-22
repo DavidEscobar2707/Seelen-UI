@@ -908,34 +908,6 @@ impl WindowsApi {
         Ok(p_physical_monitors)
     }
 
-    /// https://learn.microsoft.com/en-us/windows/win32/gdi/the-virtual-screen
-    ///
-    /// `GetSystemMetrics(SM_*VIRTUALSCREEN)` is cached by the system and is only refreshed
-    /// once the calling thread processes a `WM_DISPLAYCHANGE` message. Callers that don't pump
-    /// that message (e.g. background/async command threads, or windows reparented as children
-    /// via `SetParent` which stop receiving broadcasted messages) can observe a stale virtual
-    /// screen rect right after a monitor hotplug. Compute the rect instead from a live monitor
-    /// enumeration, which is always accurate.
-    pub fn virtual_screen_rect() -> Result<RECT> {
-        let monitors = MonitorEnumerator::enumerate_win32()?;
-        let mut rect = RECT::default();
-        for (idx, monitor) in monitors.iter().enumerate() {
-            let m_rect = monitor.rect()?;
-            if idx == 0 {
-                rect.left = m_rect.left;
-                rect.top = m_rect.top;
-                rect.right = m_rect.right;
-                rect.bottom = m_rect.bottom;
-                continue;
-            }
-            rect.left = rect.left.min(m_rect.left);
-            rect.top = rect.top.min(m_rect.top);
-            rect.right = rect.right.max(m_rect.right);
-            rect.bottom = rect.bottom.max(m_rect.bottom);
-        }
-        Ok(rect)
-    }
-
     pub fn monitor_info(hmonitor: HMONITOR) -> Result<MONITORINFOEXW> {
         let mut ex_info = MONITORINFOEXW::default();
         ex_info.monitorInfo.cbSize = u32::try_from(std::mem::size_of::<MONITORINFOEXW>())?;

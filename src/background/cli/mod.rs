@@ -17,8 +17,7 @@ use crate::{
     virtual_desktops::cli as vd_cli,
     widgets::{
         cli as widget_cli, popups::cli as popups_cli, show_settings,
-        task_switcher::cli as task_switcher_cli, wallpaper_manager::cli as wallpaper_cli,
-        weg::cli as weg_cli,
+        task_switcher::cli as task_switcher_cli, weg::cli as weg_cli,
     },
 };
 
@@ -90,9 +89,6 @@ pub async fn process_app_command(cmd: AppCommand) -> Result<()> {
         }
         AppCommand::TaskSwitcher(command) => {
             task_switcher_cli::process(command)?;
-        }
-        AppCommand::Wallpaper(command) => {
-            wallpaper_cli::process(command)?;
         }
         AppCommand::ToggleShortcutsPause => {
             shortcuts::toggle_pause()?;

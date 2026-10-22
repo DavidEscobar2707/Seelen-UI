@@ -5,7 +5,6 @@ pub mod permissions;
 pub mod popups;
 pub mod task_switcher;
 pub mod toolbar;
-pub mod wallpaper_manager;
 pub mod webview;
 pub mod weg;
 

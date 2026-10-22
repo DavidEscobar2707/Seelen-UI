@@ -153,10 +153,6 @@ slu_commands_declaration! {
         @async()
         @fallible()
         wallpaper_save_thumbnail(wallpaper_id: WallpaperId, thumbnail_bytes: Vec<u8>),
-    SetAsWallpaper =
-        @webview()
-        @fallible()
-        set_as_wallpaper(),
 
     // Logging
     LogFromWebview = log_from_webview(level: u8, message: String, location: String),

@@ -42,7 +42,6 @@ pub enum AppCommand {
     Resource(ResourceManagerCli),
     Art(ArtCli),
     TaskSwitcher(TaskSwitcherClient),
-    Wallpaper(WallpaperCli),
     /// Toggle the global shortcuts pause state
     ToggleShortcutsPause,
 }
@@ -308,21 +307,4 @@ pub enum TaskSwitcherCommand {
         #[clap(long)]
         auto_confirm: bool,
     },
-}
-
-// ===== Wallpaper =====
-
-/// Wallpaper manager commands
-#[derive(Debug, Serialize, Deserialize, clap::Args)]
-pub struct WallpaperCli {
-    #[command(subcommand)]
-    pub command: WallpaperCommand,
-}
-
-#[derive(Debug, Serialize, Deserialize, clap::Subcommand)]
-pub enum WallpaperCommand {
-    /// Cycle to the next wallpaper
-    Next,
-    /// Cycle to the previous wallpaper
-    Prev,
 }
