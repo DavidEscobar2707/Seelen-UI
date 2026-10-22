@@ -123,8 +123,8 @@
     width: 100%;
     height: 100%;
     object-fit: fill;
-    filter: blur(14px);
-    opacity: 0.8;
+    // no blur filter (perf): the stretched thumbnail is only a faint tint
+    opacity: 0.25;
     z-index: 0;
   }
 

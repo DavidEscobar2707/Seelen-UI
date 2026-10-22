@@ -196,12 +196,25 @@ fullscreen app focused (foreground/rect events) OR `GAME_MODE_ACTIVE`. Periodic 
 | InteractableWindowsRevalidator | 5 s | 10 s, skipped while paused |
 | System info monitor (cpu/disks/net) | `polling_interval` (default 3, min 1) | min 2, skipped while paused |
 | Notification fallback thread | 1 s | 2 s, skipped while paused |
+| Keyboard layout / TIP / IME monitor (`system_settings/language`; starts when the bar asks for the layout) | 1 s, only skipped while the session was not interactive | 2 s, skipped while paused (no Windows notification covers other processes' per-thread layouts; Win+Space can take up to 2 s to show) |
+| DDC/CI brightness poll (external monitors) | 5 s always once the brightness module existed | 5 s only within 30 s after a frontend read of the monitors or a brightness write (`BrightnessManager::touch_watch`), skipped while paused |
 | Waveform capture | ran when instantiated, 5 ms loop | drains at 2 s unless something subscribed to `media::waveform` and not paused (never instantiated by the dock) |
 
 Judged and left (only run during an active operation or are retries/debounces): input simulation (`windows_api/input.rs`), flashing tracker
 (only while a window flashes), tray registry lookup retry (200 ms, per icon), monitor/virtual desktop retry sleeps, wifi connect wait, bluetooth
-pairing, media players removal/thumbnail retries, TracedMutex cycle check (only while a lock is contended), DDC/CI poll (5 s, brightness module is
-lazy), websocket ping (30 s), power resume refresh, debouncers (100-1000 ms, event-triggered), wallpaper rotation (>= 60 s).
+pairing, media players removal/thumbnail retries, TracedMutex cycle check (only while a lock is contended), websocket ping (30 s), power resume refresh, debouncers (100-1000 ms, event-triggered), wallpaper rotation (>= 60 s).
+
+Phase 2 (top bar) perf rules: popups are `lazy: true` (power-menu and the 9 popups; one toolbar webview per monitor, `ReplicaByMonitor`) and are
+destroyed on close by the phase 1 mechanism. The only `infinite` animations left are the `rotateToTheLeft` spinners of the bluetooth and network popups
+(`.bluetooth-scanning`, `.network-scanning`: rendered only while a scan runs, and the popup webview only exists while open). The `filter: blur(14px)` of the
+media popup thumbnail is gone (faint opacity tint instead). The clock (`libs/ui/svelte/runes/date.svelte.ts`) ticks once per minute, aligned to the minute
+boundary, and once per second only if the format contains `ss` (default `ddd D MMM, hh:mm A` does not). Event driven with no poll: network
+(NetworkInformation / wlan notifications), radios and bluetooth (`Radio.StateChanged`, device watchers), power/battery (`PowerManager` + power broadcast),
+audio devices/volume (endpoint notifications), media sessions (SMTC events), notifications (WPN database watcher + the 2 s fallback in the table),
+system tray (hook events + 200 ms registry retry per new icon), monitors (display change events). Usage data (`SystemInfo`: cpu, memory, gpu, disks, net) is
+created lazily by the first `get_system_*` command, which only a `tb_*_usage` plugin placed in the bar issues; none is in the default items, so that
+monitor loop never starts by default. The toolbar subscribes `GlobalMouseMove` only for auto-hide modes (the layered click-through hitbox shared with the
+dock already needs it).
 
 CSS: `weg-item-attention-indicator-flashing` now runs 6 iterations instead of `infinite`; the blur filter of the media-session thumbnail
 (`MediaSession.svelte`) and the `backdrop-filter` of the shared Wallpaper error toast are gone. No `infinite` animation or blur/backdrop-filter remains in

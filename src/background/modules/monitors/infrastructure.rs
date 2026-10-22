@@ -51,6 +51,7 @@ fn get_monitors() -> Vec<PhysicalMonitor> {
 impl crate::tauri_handlers::Handlers {
     pub fn get_connected_monitors() -> Vec<PhysicalMonitor> {
         get_monitor_manager();
+        BrightnessManager::touch_watch();
         get_monitors()
     }
 

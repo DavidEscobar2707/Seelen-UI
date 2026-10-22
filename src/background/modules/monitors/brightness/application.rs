@@ -34,6 +34,17 @@ const WBEM_E_NOT_SUPPORTED: i32 = 0x8004100C_u32 as i32;
 /// (~60 ms on a healthy monitor) on a background thread.
 const DDCCI_POLL_INTERVAL: Duration = Duration::from_secs(5);
 
+/// The DDC/CI poll only runs while someone is looking at the brightness: it is armed for this long
+/// by every frontend read of the monitors (`touch_watch`) and every brightness write, and skipped
+/// while the idle pause flag is set. Without any reader it never wakes the I2C bus.
+const DDCCI_WATCH_WINDOW_MS: u64 = 30_000;
+static DDCCI_WATCH_UNTIL_MS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+static WATCH_CLOCK: LazyLock<std::time::Instant> = LazyLock::new(std::time::Instant::now);
+
+fn now_ms() -> u64 {
+    WATCH_CLOCK.elapsed().as_millis() as u64 + 1
+}
+
 /// Serializes every DDC/CI transaction (polling and writes) *together with* the publication
 /// of its result into `BrightnessManager::ddcci`. Holding the lock across both steps means a
 /// read that started before a write can never overwrite the written value afterwards.
@@ -149,7 +160,13 @@ impl BrightnessManager {
                     while rx.try_recv().is_ok() {}
                     Self::scan();
                 }
-                Err(crossbeam_channel::RecvTimeoutError::Timeout) => Self::ddcci_poll(),
+                Err(crossbeam_channel::RecvTimeoutError::Timeout) => {
+                    let watched =
+                        now_ms() < DDCCI_WATCH_UNTIL_MS.load(std::sync::atomic::Ordering::Relaxed);
+                    if watched && !crate::utils::idle::is_paused() {
+                        Self::ddcci_poll();
+                    }
+                }
                 Err(crossbeam_channel::RecvTimeoutError::Disconnected) => return,
             }
         }
@@ -378,6 +395,14 @@ impl BrightnessManager {
         Ok(!panels.is_empty())
     }
 
+    /// Arms the DDC/CI poll for the next `DDCCI_WATCH_WINDOW_MS`.
+    pub fn touch_watch() {
+        DDCCI_WATCH_UNTIL_MS.store(
+            now_ms() + DDCCI_WATCH_WINDOW_MS,
+            std::sync::atomic::Ordering::Relaxed,
+        );
+    }
+
     fn emit_changed(&self) {
         Self::send(BrightnessManagerEvent::Changed);
     }
@@ -398,6 +423,7 @@ impl BrightnessManager {
     /// and is mapped to whatever range each panel works with.
     pub fn set_brightness(&self, id: &MonitorId, percent: u8) -> Result<()> {
         let percent = percent.min(100);
+        Self::touch_watch();
 
         let mut supported = false;
         for panel in self.wmi.to_vec() {

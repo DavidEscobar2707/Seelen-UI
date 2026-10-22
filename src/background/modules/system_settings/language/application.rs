@@ -33,9 +33,7 @@ use crate::{
     error::{Result, ResultLogExt},
     event_manager,
     utils::{lock_free::SyncVec, spawn_named_thread},
-    windows_api::{
-        Com, WindowsApi, event_window::IS_INTERACTIVE_SESSION, string_utils::WindowsString,
-    },
+    windows_api::{Com, WindowsApi, string_utils::WindowsString},
 };
 
 #[allow(clippy::upper_case_acronyms)]
@@ -93,8 +91,10 @@ impl LanguageManager {
             let mut ime = Self::get_ime_state().unwrap_or_default();
 
             loop {
-                std::thread::sleep(std::time::Duration::from_secs(1));
-                if !IS_INTERACTIVE_SESSION.load(std::sync::atomic::Ordering::Acquire) {
+                // No Windows notification covers per-thread layout/TIP/IME changes of other processes,
+                // so this stays a poll: 2 s and skipped while the shared idle pause flag is set.
+                std::thread::sleep(std::time::Duration::from_secs(2));
+                if crate::utils::idle::is_paused() {
                     continue;
                 }
 
