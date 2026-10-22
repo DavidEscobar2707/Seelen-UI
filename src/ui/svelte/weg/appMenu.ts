@@ -1,5 +1,5 @@
 import { invoke, SeelenCommand, Widget } from "@seelen-ui/lib";
-import type { ContextMenu, ContextMenuItem, UserAppWindow, WidgetId } from "@seelen-ui/lib/types";
+import type { ContextMenu, ContextMenuItem, UserAppWindow } from "@seelen-ui/lib/types";
 import type { AppOrFileWegItem } from "./types.ts";
 import { dockStateActions } from "./state/items.svelte.ts";
 import { fullSettings } from "./state/settings.svelte.ts";
@@ -38,14 +38,6 @@ Widget.self.webview.listen(onAppMenuClick, ({ payload }) => {
     windows.forEach((w) => invoke(SeelenCommand.WegCloseApp, { hwnd: w.hwnd }));
   } else if (key === "kill") {
     windows.forEach((w) => invoke(SeelenCommand.WegKillApp, { hwnd: w.hwnd }));
-  } else if (key === "edit_app_icon") {
-    const entry = iconPackManager.value.getIconEntry({ path: item.path, umid: item.umid });
-    invoke(SeelenCommand.TriggerWidget, {
-      payload: {
-        id: "@seelen/icon-editor" as WidgetId,
-        customArgs: { entry },
-      },
-    });
   }
 });
 
@@ -103,13 +95,6 @@ export function getUserApplicationContextMenu(
       key: "run_as",
       icon: "MdOutlineAdminPanelSettings",
       label: t("app_menu.run_as"),
-      callbackEvent: onAppMenuClick,
-    },
-    {
-      type: "Item",
-      key: "edit_app_icon",
-      icon: "RiEditBoxLine",
-      label: t("app_menu.edit_app_icon"),
       callbackEvent: onAppMenuClick,
     },
   );

@@ -8,7 +8,6 @@
   import type { PluginWegItem } from "../../types.ts";
   import { t } from "../../i18n/index.ts";
   import {
-    getEditCustomIconEntry,
     getEmptyTrashBinEntry,
     getMenuForItem,
   } from "../../generalMenu.ts";
@@ -78,10 +77,6 @@
     const alignY = settingsState.popupAlignY;
 
     const menu = getMenuForItem($t, item);
-
-    if (customIconKey) {
-      menu.items.unshift(getEditCustomIconEntry($t, customIconKey), { type: "Separator" });
-    }
 
     if (hasTrashBinScope) {
       menu.items.unshift(getEmptyTrashBinEntry($t), { type: "Separator" });

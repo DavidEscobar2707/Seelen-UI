@@ -2,7 +2,6 @@ app_menu:
   close: Close
   close_multiple: Close All
   copy_handles: Copy Handles
-  edit_app_icon: Edit App Icon
   kill: Kill Process
   kill_multiple: Kill All Processes
   open_file_location: Open File Location
@@ -13,7 +12,6 @@ app_menu:
   run_as: Run as Administrator
   unpin: Unpin
 context_menu:
-  edit_icon: Edit Icon
   remove_module: Remove Module
   remove_separator: Remove Separator
   reorder_disable: Lock taskbar

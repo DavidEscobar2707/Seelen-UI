@@ -307,21 +307,10 @@ slu_commands_declaration! {
     StateGetIconPacks = state_get_icon_packs() -> Vec<std::sync::Arc<IconPack>>,
     StateGetWallpapers = state_get_wallpapers() -> Vec<std::sync::Arc<Wallpaper>>,
     StateGetSystemShortcuts = state_get_system_shortcuts() -> Vec<SystemShortcutDeclaration>,
-    StateSetCustomIconPack =
-        @fallible()
-        state_add_icon_to_custom_icon_pack(icon: IconPackEntry),
     StateDeleteCachedIcons =
         @async()
         @fallible()
         state_delete_cached_icons(),
-    RegisterUserCustomAppIcon =
-        @async()
-        @fallible()
-        register_user_custom_app_icon(icon_base64: String, entry: IconPackEntry),
-    DeleteUserCustomAppIcon =
-        @async()
-        @fallible()
-        delete_user_custom_app_icon(entry: IconPackEntry),
     StateRequestWallpaperAddition =
         @fallible()
         state_request_wallpaper_addition(),

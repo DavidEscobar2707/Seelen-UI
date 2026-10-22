@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use seelen_core::state::{
-    AppConfig, IconPackEntry, PerformanceMode, Settings, ToolbarState, Wallpaper, WegItems,
+    AppConfig, PerformanceMode, Settings, ToolbarState, Wallpaper, WegItems,
     by_monitor::MonitorConfiguration, by_wallpaper::WallpaperInstanceSettings,
 };
 use tauri::WebviewWindow;
@@ -107,10 +107,6 @@ impl crate::tauri_handlers::Handlers {
                 }
             });
         Ok(())
-    }
-
-    pub fn state_add_icon_to_custom_icon_pack(_icon: IconPackEntry) -> Result<()> {
-        todo!()
     }
 
     pub fn state_get_performance_mode() -> PerformanceMode {
