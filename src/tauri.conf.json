@@ -32,7 +32,6 @@
   },
   "bundle": {
     "active": true,
-    "createUpdaterArtifacts": true,
     "publisher": "Seelen",
     "category": "Utility",
     "copyright": "Copyright © 2024",
@@ -84,11 +83,6 @@
           "vietnamese"
         ]
       }
-    }
-  },
-  "plugins": {
-    "updater": {
-      "pubkey": ""
     }
   }
 }

@@ -8,7 +8,6 @@ use crate::{
     app::{SeelenUI, get_app_handle},
     error::Result,
     utils::{
-        self,
         constants::SEELEN_COMMON,
         icon_extractor::{request_icon_extraction_from_file, request_icon_extraction_from_umid},
         pwsh::PwshScript,
@@ -97,20 +96,6 @@ impl crate::tauri_handlers::Handlers {
         if let Some(path) = path {
             request_icon_extraction_from_file(&path);
         }
-        Ok(())
-    }
-
-    pub async fn check_for_updates() -> Result<bool> {
-        Ok(utils::updater::check_for_updates().await?.is_some())
-    }
-
-    pub async fn install_last_available_update() -> Result<()> {
-        let update = utils::updater::check_for_updates()
-            .await?
-            .ok_or("There is no update available")?;
-        utils::updater::trace_update_intallation(update).await?;
-        get_app_handle().restart();
-        #[allow(unreachable_code)]
         Ok(())
     }
 

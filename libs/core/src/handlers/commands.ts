@@ -27,8 +27,6 @@ export enum SeelenCommand {
   GetIcon = "get_icon",
   ShowDesktop = "show_desktop",
   RequestToUserInputShortcut = "request_to_user_input_shortcut",
-  CheckForUpdates = "check_for_updates",
-  InstallLastAvailableUpdate = "install_last_available_update",
   SystemGetMonitors = "get_connected_monitors",
   SetMonitorHdr = "set_monitor_hdr",
   SetMonitorBrightness = "set_monitor_brightness",

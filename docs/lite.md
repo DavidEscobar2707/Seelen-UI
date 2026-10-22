@@ -47,3 +47,7 @@ One removal per commit, so each one can be reverted alone.
   resource and icon/wallpaper asset downloader), `AppMessage::OpenUri` in `libs/slu-ipc`, the positional `uri` arg of the main CLI, the
   `deep-link` plugin config and `.slu` file association in `src/tauri.conf.json`. Local bundled and user resources on disk still load;
   `slu resource load/unload` stays. (`src/templates/AppxManifest.xml` still declares the protocol; msix is not built by the fork.)
+- Updater: `src/background/utils/updater.rs`, `tauri-plugin-updater` (dependency + plugin registration + `Updater` error variant), commands
+  `check_for_updates` / `install_last_available_update` (+ bindings), `createUpdaterArtifacts` and the `plugins.updater` pubkey in
+  `tauri.conf.json`, the settings header `UpdateButton`. `UpdaterSettings`/`UpdateChannel` types stay in `libs/core` (data only). `reqwest`
+  now enables `json` explicitly (it was only on via the updater plugin).

@@ -4,7 +4,6 @@ pub mod icon_extractor;
 pub mod integrity;
 pub mod lock_free;
 pub mod pwsh;
-pub mod updater;
 pub mod virtual_desktop;
 mod winver;
 

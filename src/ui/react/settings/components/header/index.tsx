@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 import { NavLink, useLocation, useSearchParams } from "react-router";
 
 import { RouteExtraInfo } from "./ExtraInfo.tsx";
-import { UpdateButton } from "./UpdateButton.tsx";
 import cs from "./index.module.css";
 import { themes as themeList, widgets as widgetList } from "../../state/resources.ts";
 import { hasChanges, needRestart, restoreToLastSaved, saveSettings } from "../../state/mod.ts";
@@ -69,7 +68,6 @@ export const Header = () => {
         {ExtraInfo && <ExtraInfo />}
       </div>
       <div className={cs.actions}>
-        <UpdateButton />
         <Button
           style={{ minWidth: 60 }}
           type="default"

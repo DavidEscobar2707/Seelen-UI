@@ -205,16 +205,6 @@ slu_commands_declaration! {
         @fallible()
         request_to_user_input_shortcut() -> Option<Vec<String>>,
 
-    CheckForUpdates =
-        @async()
-        @fallible()
-        check_for_updates() -> bool,
-    // Restart the app after install the update so it returns a promise resolved with `never`
-    InstallLastAvailableUpdate =
-        @async()
-        @fallible()
-        install_last_available_update(),
-
     // System
     SystemGetMonitors = get_connected_monitors() -> Vec<PhysicalMonitor>,
     SetMonitorHdr =
