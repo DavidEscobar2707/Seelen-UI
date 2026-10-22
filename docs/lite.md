@@ -177,3 +177,7 @@ Notes: an `AppOrFile` without `umid` (or whose path is a `.lnk`) is dropped on l
 - Window pixel capture: `modules/apps/application/previews.rs` (`WinPreviewManager`, 200 ms `capture_window` + edge-color sampling), command
   `get_user_app_windows_colors`, event `user::windows-colors-changed`, `UserAppWindowColors` type, the `win-screenshot` dependency and the
   dock `--window-gradient` / `data-there-is-maximized-on-bg` tinting (the dock now always uses theme colors).
+- Popups destroyed on close: lazy widgets (`@seelen/context-menu`, `@seelen/tooltip`) used to hide and keep the webview for 30 s; `Widget.hide()` now
+  closes it 300 ms after hiding (the delay only lets a quick re-show reuse it; `show()` cancels the close). The `WindowEvent::Destroyed` handler
+  kills the pod and never respawns lazy widgets; no lazy widget is created at startup (`reconcile` only starts non-lazy deployments). A trigger on a
+  destroyed lazy widget re-runs `reconcile` and starts a new webview through `PENDING_TRIGGERS`.

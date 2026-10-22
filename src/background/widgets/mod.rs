@@ -106,6 +106,8 @@ fn trigger_widget_inner(
         PENDING_TRIGGERS.upsert(label.clone(), payload);
 
         WIDGET_MANAGER.deployments.get(&label.widget_id, |c| {
+            // a lazy widget destroyed on close may not have its (pending) pod back yet
+            c.reconcile();
             c.start_webview(&label);
         });
         return Ok(());

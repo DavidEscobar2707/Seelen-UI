@@ -5,13 +5,19 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 /** Max time given to widgets to play their hide animation before the window is really hidden */
 const HIDE_ANIMATION_MAX_MS = 200;
 
+/**
+ * Lazy widgets (popups, tooltips) are destroyed on hide, never kept alive hidden. The short delay only
+ * lets a quick re-show (e.g. moving the pointer between two dock items) reuse the same webview.
+ */
+const CLOSE_DELAY_MS = 300;
+
 const debouncedClose = debounce(async () => {
   const window = getCurrentWindow();
   // safety net, never close a window that the user is looking at
   if (!(await window.isVisible())) {
     await window.close();
   }
-}, 30_000);
+}, CLOSE_DELAY_MS);
 
 export class Widget_4 extends Widget_3 {
   protected _destroyOnHide = false;

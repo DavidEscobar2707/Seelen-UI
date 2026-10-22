@@ -240,6 +240,8 @@ impl WidgetPod {
                     WIDGET_MANAGER.deployments.get(&label.widget_id, |deploy| {
                         deploy.kill_pod(&label);
                         deploy.reconcile();
+                        // lazy widgets (popups, tooltip) are destroyed on close and only created
+                        // again by the next trigger (PENDING_TRIGGERS path), never respawned here.
                         // suspend_all() destroys every widget when game mode starts; respawning
                         // here would bring them back on top of the game. resume_all() starts
                         // them again once game mode ends.
