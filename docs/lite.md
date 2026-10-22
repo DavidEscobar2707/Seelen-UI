@@ -245,3 +245,26 @@ Not met: the working-set sum (377 MB) is above 150 MB. One WebView2 surface alon
 renderer, network, storage, crashpad) at ~285 MB working set; working sets double-count shared DLL pages. Private
 bytes (129 MB) is under 150 MB. Tried `NetworkServiceInProcess`: one process less but private +30 MB, not kept.
 Not measured: idle power (laptop was plugged in; `BatteryStatus.DischargeRate` is only valid on battery).
+
+## Phase 2 (top bar)
+
+Restored from upstream by reverting the two removal commits (`4d312354` toolbar, `d60c6fcd` popups), then adapted to phase 1:
+
+- Toolbar widget `@seelen/fancy-toolbar` (`src/ui/svelte/fancy-toolbar`, `src/static/widgets/toolbar`, `src/background/widgets/toolbar`), theme style, the 11
+  `tb_*` plugins, and the dock reserves space for the bar again (`weg/state/settings.svelte.ts`, `workArea`).
+- Popups (all lazy, only the ones the default bar opens): `bluetooth-popup`, `calendar-popup`, `keyboard-selector`, `media-popup`, `network-popup`,
+  `notifications` (+ its `Notification.svelte`, restored because the flyouts that used to share it are gone), `quick-settings`, `system-tray`, `power-menu`.
+  Their optional `dock-plugin.yml`/`dock_plugin.js` came back with the bundles (opt-in dock buttons, not in the default dock items).
+- Default items (only applied if the toolbar `state.yml` in its widget data dir does not exist yet; an existing file keeps its own items, delete it to
+  get the new defaults). Left: user (`@seelen/tb-user-menu`, new `tb_default_user.yml`, shows picture and name; click opens `ms-settings:yourinfo`),
+  `|`, focused app, `-`, focused app title. Center: date/time (opens the calendar). Right: system tray, keyboard layout, bluetooth, media/volume,
+  network/wifi, battery (`@default/power`, opens `ms-settings:powersleep`), notifications, quick settings.
+- Not in the default: `tb_cpu_usage`, `tb_memory_usage`, `tb_gpu_usage`, `tb_disk_usage`, `tb_network_usage` (installed, add them by hand to
+  the toolbar state; the first one placed starts the system info monitor), `tb_workspaces_*` (virtual desktop switchers; still functional because
+  `virtual_desktops` stays, kept), `@seelen/tb-power-menu` (available, not in the default).
+- Frontend fixes: window pixel capture is gone, so the toolbar no longer reads `GetUserAppWindowsColors` / `UserAppWindowsColorsChanged` nor sets
+  `--window-gradient`; all backend events reach the toolbar and popups through `subscribe` (websocket). The remaining tauri `listen`/`emit` are
+  webview-local (context-menu callbacks, `hidden::sync-toolbar-items` between monitors).
+- Dangling triggers are harmless: `@seelen/settings` opens the config folder, `@seelen/user-menu`, `@seelen/apps-menu` (only read as a settings key) do nothing.
+
+Stays removed: user-menu, apps-menu, flyouts (volume/brightness OSD), settings app, window manager, workspaces viewer, wallpaper manager, task switcher.
