@@ -10,6 +10,7 @@ mod hook;
 mod logger;
 mod migrations;
 mod modules;
+mod mouse_hook;
 mod resources;
 mod server;
 mod state;

@@ -4,10 +4,8 @@ use std::{
         Arc,
         atomic::{AtomicBool, Ordering},
     },
-    time::Duration,
 };
 
-use crate::server::events::EVENTS_HUB;
 use parking_lot::RwLock;
 use seelen_core::handlers::SeelenEvent;
 use windows::Win32::{
@@ -31,7 +29,6 @@ use crate::{
     windows_api::{
         WindowEnumerator,
         event_window::IS_INTERACTIVE_SESSION,
-        input::Mouse,
         window::{Window, event::WinEvent},
     },
 };
@@ -170,32 +167,7 @@ pub fn register_win_hook() -> Result<()> {
     });
     HookManager::set_event_handler_priority(&eid, 3);
 
-    // todo move this to input/mouse/keyboard module
-    spawn_named_thread("MouseEventHook", || {
-        let mut last_pos = seelen_core::Point::default();
-        let sleep_time = Duration::from_millis(100); // 10fps
-        loop {
-            // Only poll while a webview subscribed to the event (the dock click-through hitbox),
-            // otherwise block until somebody subscribes.
-            if !EVENTS_HUB.has_listeners(SeelenEvent::GlobalMouseMove.as_ref()) {
-                EVENTS_HUB.wait_for_listeners_change(Duration::from_secs(10));
-                continue;
-            }
-
-            if crate::utils::idle::is_paused() {
-                std::thread::sleep(Duration::from_secs(2));
-                continue;
-            }
-
-            if let Ok(pos) = Mouse::get_cursor_pos()
-                && last_pos != pos
-            {
-                emit_to_webviews(SeelenEvent::GlobalMouseMove, [pos.x, pos.y]);
-                last_pos = pos;
-            }
-            std::thread::sleep(sleep_time);
-        }
-    });
+    crate::mouse_hook::init();
 
     Ok(())
 }
