@@ -21,7 +21,6 @@ use crate::{
         notify_widget_statuses_change,
         webview::{self, WidgetWebview},
     },
-    windows_api::event_window::IS_INTERACTIVE_SESSION,
 };
 
 pub enum PodSource {
@@ -29,7 +28,7 @@ pub enum PodSource {
     Runtime,
 }
 
-const LIVENESS_PROVE_INTERVAL: Duration = Duration::from_secs(5);
+const LIVENESS_PROVE_INTERVAL: Duration = Duration::from_secs(60);
 const LIVENESS_PROVE_WAIT_TIMEOUT: Duration = Duration::from_secs(3);
 const LIVENESS_PROVE_MAX_RETRIES: u8 = 5;
 // Grace period after session resume or soft_restart to let the webview finish reloading.
@@ -274,6 +273,9 @@ impl WidgetPod {
         let handle = get_tokio_handle().spawn(async move {
             loop {
                 tokio::time::sleep(MEMORY_PRESSURE_INTERVAL).await;
+                if crate::utils::idle::is_paused() {
+                    continue;
+                }
                 webview::simulate_memory_pressure(&webview);
             }
         });
@@ -299,7 +301,7 @@ impl WidgetPod {
 
             loop {
                 tokio::time::sleep(LIVENESS_PROVE_INTERVAL).await;
-                if !IS_INTERACTIVE_SESSION.load(std::sync::atomic::Ordering::Acquire) {
+                if crate::utils::idle::is_paused() {
                     was_suspended = true;
                     continue;
                 }

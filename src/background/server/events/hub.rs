@@ -6,7 +6,7 @@ use std::{
     },
 };
 
-use parking_lot::RwLock;
+use parking_lot::{Condvar, Mutex, RwLock};
 use seelen_core::handlers::SeelenEvent;
 use tokio::sync::Notify;
 
@@ -17,6 +17,9 @@ use super::protocol::event_frame;
 /// Upper bound of undelivered frames per connection. Snapshot events take at most one slot each,
 /// so this only caps queued events of a webview that stopped reading.
 const MAX_PENDING_FRAMES: usize = 256;
+
+/// Wakes threads blocked in `wait_for_listeners_change`.
+static LISTENERS_CHANGED: (Mutex<()>, Condvar) = (Mutex::new(()), Condvar::new());
 
 pub static EVENTS_HUB: LazyLock<EventsHub> = LazyLock::new(EventsHub::default);
 
@@ -37,6 +40,17 @@ impl EventsHub {
             .read()
             .get(event)
             .is_some_and(|count| *count > 0)
+    }
+
+    /// Blocks the calling thread until the listeners change (or the timeout elapses).
+    pub fn wait_for_listeners_change(&self, timeout: std::time::Duration) {
+        let mut guard = LISTENERS_CHANGED.0.lock();
+        LISTENERS_CHANGED.1.wait_for(&mut guard, timeout);
+    }
+
+    fn notify_listeners_changed(&self) {
+        let _guard = LISTENERS_CHANGED.0.lock();
+        LISTENERS_CHANGED.1.notify_all();
     }
 
     /// Hands the already serialized payload to every subscribed connection.
@@ -96,6 +110,7 @@ impl EventsHub {
         }
         if connection.subscriptions.lock().insert(event.to_owned()) {
             *self.listeners.write().entry(event.to_owned()).or_default() += 1;
+            self.notify_listeners_changed();
         }
         true
     }

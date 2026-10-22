@@ -181,3 +181,24 @@ Notes: an `AppOrFile` without `umid` (or whose path is a `.lnk`) is dropped on l
   closes it 300 ms after hiding (the delay only lets a quick re-show reuse it; `show()` cancels the close). The `WindowEvent::Destroyed` handler
   kills the pod and never respawns lazy widgets; no lazy widget is created at startup (`reconcile` only starts non-lazy deployments). A trigger on a
   destroyed lazy widget re-runs `reconcile` and starts a new webview through `PENDING_TRIGGERS`.
+
+## Perf
+
+Shared pause flag: `utils::idle::is_paused()` = session not interactive OR display off (`GUID_CONSOLE_DISPLAY_STATE` on the background window) OR a
+fullscreen app focused (foreground/rect events) OR `GAME_MODE_ACTIVE`. Periodic loops check it.
+
+| Loop | Before | Now |
+| --- | --- | --- |
+| MouseEventHook (`GlobalMouseMove`) | 10 Hz always | 10 Hz only while a webview subscribed to the event (dock click-through hitbox) and not paused; otherwise blocked on a condvar woken by the hub's subscribe |
+| Zombie window killer | 1 s | 10 s, skipped while paused |
+| Widget liveness ping | 5 s | 60 s, skipped while paused |
+| Memory pressure simulation | 30 s | 30 s, skipped while paused |
+| InteractableWindowsRevalidator | 5 s | 10 s, skipped while paused |
+| System info monitor (cpu/disks/net) | `polling_interval` (default 3, min 1) | min 2, skipped while paused |
+| Notification fallback thread | 1 s | 2 s, skipped while paused |
+| Waveform capture | ran when instantiated, 5 ms loop | drains at 2 s unless something subscribed to `media::waveform` and not paused (never instantiated by the dock) |
+
+Judged and left (only run during an active operation or are retries/debounces): input simulation (`windows_api/input.rs`), flashing tracker
+(only while a window flashes), tray registry lookup retry (200 ms, per icon), monitor/virtual desktop retry sleeps, wifi connect wait, bluetooth
+pairing, media players removal/thumbnail retries, TracedMutex cycle check (only while a lock is contended), DDC/CI poll (5 s, brightness module is
+lazy), websocket ping (30 s), power resume refresh, debouncers (100-1000 ms, event-triggered), wallpaper rotation (>= 60 s).

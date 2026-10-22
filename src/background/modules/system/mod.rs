@@ -1,7 +1,7 @@
 pub mod gpu;
 pub mod tauri;
 
-use std::sync::{LazyLock, atomic::Ordering};
+use std::sync::LazyLock;
 
 use gpu::GpuMonitor;
 use seelen_core::system_state::{Core, Disk, Gpu, Memory, NetworkStatistics};
@@ -11,7 +11,6 @@ use crate::{
     event_manager,
     state::application::FULL_STATE,
     utils::lock_free::TracedMutex,
-    windows_api::event_window::IS_INTERACTIVE_SESSION,
 };
 
 pub struct SystemInfo {
@@ -78,7 +77,7 @@ impl SystemInfo {
         // Spawn monitoring thread
         std::thread::spawn(|| {
             loop {
-                if !IS_INTERACTIVE_SESSION.load(Ordering::Acquire) {
+                if crate::utils::idle::is_paused() {
                     std::thread::sleep(std::time::Duration::from_secs(5));
                     continue;
                 }

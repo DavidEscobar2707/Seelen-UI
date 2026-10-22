@@ -7,6 +7,7 @@ use std::{
     time::Duration,
 };
 
+use crate::server::events::EVENTS_HUB;
 use parking_lot::RwLock;
 use seelen_core::handlers::SeelenEvent;
 use windows::Win32::{
@@ -174,9 +175,15 @@ pub fn register_win_hook() -> Result<()> {
         let mut last_pos = seelen_core::Point::default();
         let sleep_time = Duration::from_millis(100); // 10fps
         loop {
-            // Pause when session is not interactive to reduce CPU usage
-            if !IS_INTERACTIVE_SESSION.load(Ordering::Acquire) {
-                std::thread::sleep(Duration::from_secs(1));
+            // Only poll while a webview subscribed to the event (the dock click-through hitbox),
+            // otherwise block until somebody subscribes.
+            if !EVENTS_HUB.has_listeners(SeelenEvent::GlobalMouseMove.as_ref()) {
+                EVENTS_HUB.wait_for_listeners_change(Duration::from_secs(10));
+                continue;
+            }
+
+            if crate::utils::idle::is_paused() {
+                std::thread::sleep(Duration::from_secs(2));
                 continue;
             }
 
@@ -219,10 +226,9 @@ pub fn init_zombie_window_killer() {
             .log_error();
 
         loop {
-            std::thread::sleep(std::time::Duration::from_secs(1));
+            std::thread::sleep(std::time::Duration::from_secs(10));
 
-            // Pause when session is not interactive to reduce CPU usage
-            if !IS_INTERACTIVE_SESSION.load(Ordering::Acquire) {
+            if crate::utils::idle::is_paused() {
                 continue;
             }
 

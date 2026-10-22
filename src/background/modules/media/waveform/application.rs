@@ -4,7 +4,7 @@ use std::sync::{
 };
 
 use rustfft::{FftPlanner, num_complex::Complex};
-use seelen_core::{state::PerformanceMode, system_state::AudioWaveform};
+use seelen_core::{handlers::SeelenEvent, state::PerformanceMode, system_state::AudioWaveform};
 use windows::Win32::{
     Media::Audio::{
         AUDCLNT_BUFFERFLAGS_SILENT, AUDCLNT_SHAREMODE_SHARED, AUDCLNT_STREAMFLAGS_LOOPBACK,
@@ -18,9 +18,10 @@ use crate::{
     error::{Result, ResultLogExt},
     event_manager,
     modules::media::devices::{DevicesEvent, DevicesManager},
+    server::events::EVENTS_HUB,
     state::application::performance::PERFORMANCE_MODE,
     utils::{lock_free::TracedMutex, spawn_named_thread},
-    windows_api::{Com, event_window::IS_INTERACTIVE_SESSION},
+    windows_api::Com,
 };
 
 use super::domain::CaptureSession;
@@ -211,10 +212,12 @@ fn run_capture_loop(
             break;
         }
 
-        // Pause when session is not interactive (screen locked / user switched).
-        if !IS_INTERACTIVE_SESSION.load(Ordering::Acquire) {
+        // Only work while something is subscribed and the shared pause flag is clear.
+        if crate::utils::idle::is_paused()
+            || !EVENTS_HUB.has_listeners(SeelenEvent::MediaWaveform.as_ref())
+        {
             drain_silently(&session);
-            std::thread::sleep(std::time::Duration::from_secs(1));
+            std::thread::sleep(std::time::Duration::from_secs(2));
             continue;
         }
 

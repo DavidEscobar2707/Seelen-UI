@@ -1,7 +1,4 @@
-use std::{
-    sync::atomic::Ordering,
-    time::{SystemTime, UNIX_EPOCH},
-};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use seelen_core::{
     state::AppExtraFlag,
@@ -20,7 +17,6 @@ use crate::{
     utils::spawn_named_thread,
     windows_api::{
         WindowEnumerator, WindowsApi,
-        event_window::IS_INTERACTIVE_SESSION,
         window::{Window, event::WinEvent},
     },
 };
@@ -54,10 +50,10 @@ impl UserAppsManager {
 
         spawn_named_thread("InteractableWindowsRevalidator", || {
             loop {
-                std::thread::sleep(std::time::Duration::from_millis(5000));
+                std::thread::sleep(std::time::Duration::from_millis(10_000));
 
                 // Pause when session is not interactive to reduce CPU usage
-                if !IS_INTERACTIVE_SESSION.load(Ordering::Acquire) {
+                if crate::utils::idle::is_paused() {
                     continue;
                 }
 

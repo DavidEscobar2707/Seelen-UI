@@ -43,7 +43,6 @@ use crate::{
     },
     windows_api::{
         WindowsApi,
-        event_window::IS_INTERACTIVE_SESSION,
         types::{AppUserModelId, DateTimeExt},
         undocumented::{
             QUIET_HOURS_PROFILE_ALARMS_ONLY, QUIET_HOURS_PROFILE_PRIORITY_ONLY,
@@ -145,9 +144,8 @@ impl NotificationManager {
                 spawn_named_thread("Notification Manager", || -> Result<()> {
                     RELEASED.store(false, Ordering::SeqCst);
                     while !RELEASED.load(Ordering::Acquire) {
-                        std::thread::sleep(std::time::Duration::from_secs(1));
-                        // Pause when session is not interactive to reduce CPU usage
-                        if !IS_INTERACTIVE_SESSION.load(Ordering::Acquire) {
+                        std::thread::sleep(std::time::Duration::from_secs(2));
+                        if crate::utils::idle::is_paused() {
                             continue;
                         }
                         Self::manual_notifications_loop().log_error();

@@ -640,7 +640,7 @@ impl Settings {
         self.by_app.prepare();
         self.by_widget.sanitize();
 
-        self.polling_interval = self.polling_interval.max(1);
+        self.polling_interval = self.polling_interval.max(2);
         Ok(())
     }
 
