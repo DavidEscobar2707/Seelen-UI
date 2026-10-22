@@ -1,0 +1,112 @@
+﻿{
+    "summary":  {
+                    "Label":  "baseline-locked-2",
+                    "When":  "2026-10-22T01:39:57",
+                    "WindowSec":  60,
+                    "Processes":  12,
+                    "WebViewProcesses":  11,
+                    "Sum_WorkingSet_MB":  1466,
+                    "Sum_Private_MB":  1025.7,
+                    "Sum_CPU_pct_of_machine":  2.974,
+                    "OnBattery":  true,
+                    "DischargeRate_mW":  8029
+                },
+    "rows":  [
+                 {
+                     "Name":  "seelen-ui.exe",
+                     "Pid":  20468,
+                     "Type":  "main",
+                     "WS_MB":  623.5,
+                     "Private_MB":  559.6,
+                     "CPU_pct":  2.881
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  27800,
+                     "Type":  "main",
+                     "WS_MB":  139.5,
+                     "Private_MB":  57.3,
+                     "CPU_pct":  0.042
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  40412,
+                     "Type":  "crashpad-handler",
+                     "WS_MB":  13,
+                     "Private_MB":  2.9,
+                     "CPU_pct":  0
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  12604,
+                     "Type":  "gpu-process",
+                     "WS_MB":  172.4,
+                     "Private_MB":  173.7,
+                     "CPU_pct":  0
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  48728,
+                     "Type":  "utility:network.mojom.NetworkService",
+                     "WS_MB":  40.8,
+                     "Private_MB":  11.6,
+                     "CPU_pct":  0.006
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  35044,
+                     "Type":  "utility:storage.mojom.StorageService",
+                     "WS_MB":  19.6,
+                     "Private_MB":  7.3,
+                     "CPU_pct":  0
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  1788,
+                     "Type":  "renderer",
+                     "WS_MB":  69.7,
+                     "Private_MB":  30.2,
+                     "CPU_pct":  0.008
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  21460,
+                     "Type":  "renderer",
+                     "WS_MB":  84.1,
+                     "Private_MB":  39.8,
+                     "CPU_pct":  0.008
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  48668,
+                     "Type":  "renderer",
+                     "WS_MB":  81.2,
+                     "Private_MB":  36.5,
+                     "CPU_pct":  0.006
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  22860,
+                     "Type":  "renderer",
+                     "WS_MB":  81.1,
+                     "Private_MB":  47,
+                     "CPU_pct":  0.018
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  29392,
+                     "Type":  "renderer",
+                     "WS_MB":  74.6,
+                     "Private_MB":  30.9,
+                     "CPU_pct":  0.002
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  45992,
+                     "Type":  "renderer",
+                     "WS_MB":  66.5,
+                     "Private_MB":  28.9,
+                     "CPU_pct":  0.003
+                 }
+             ]
+}

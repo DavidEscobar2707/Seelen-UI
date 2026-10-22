@@ -1,0 +1,72 @@
+﻿{
+    "summary":  {
+                    "Label":  "baseline-dock-only",
+                    "When":  "2026-10-22T11:07:10",
+                    "WindowSec":  60,
+                    "Processes":  7,
+                    "WebViewProcesses":  6,
+                    "Sum_WorkingSet_MB":  484.4,
+                    "Sum_Private_MB":  234.2,
+                    "Sum_CPU_pct_of_machine":  0.207,
+                    "OnBattery":  false,
+                    "DischargeRate_mW":  0
+                },
+    "rows":  [
+                 {
+                     "Name":  "seelen-ui.exe",
+                     "Pid":  25752,
+                     "Type":  "main",
+                     "WS_MB":  106.5,
+                     "Private_MB":  50.7,
+                     "CPU_pct":  0.197
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  25444,
+                     "Type":  "main",
+                     "WS_MB":  120.7,
+                     "Private_MB":  34.8,
+                     "CPU_pct":  0.005
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  24764,
+                     "Type":  "crashpad-handler",
+                     "WS_MB":  12.9,
+                     "Private_MB":  2.9,
+                     "CPU_pct":  0
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  52160,
+                     "Type":  "gpu-process",
+                     "WS_MB":  101.1,
+                     "Private_MB":  89,
+                     "CPU_pct":  0
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  41284,
+                     "Type":  "utility:network.mojom.NetworkService",
+                     "WS_MB":  38.8,
+                     "Private_MB":  10.2,
+                     "CPU_pct":  0.002
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  41060,
+                     "Type":  "utility:storage.mojom.StorageService",
+                     "WS_MB":  19.4,
+                     "Private_MB":  7.2,
+                     "CPU_pct":  0
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  16692,
+                     "Type":  "renderer",
+                     "WS_MB":  85,
+                     "Private_MB":  39.4,
+                     "CPU_pct":  0.003
+                 }
+             ]
+}

@@ -1,0 +1,112 @@
+﻿{
+    "summary":  {
+                    "Label":  "baseline-defaults",
+                    "When":  "2026-10-22T10:52:43",
+                    "WindowSec":  60,
+                    "Processes":  12,
+                    "WebViewProcesses":  11,
+                    "Sum_WorkingSet_MB":  1470.2,
+                    "Sum_Private_MB":  1002.1,
+                    "Sum_CPU_pct_of_machine":  5.088,
+                    "OnBattery":  false,
+                    "DischargeRate_mW":  0
+                },
+    "rows":  [
+                 {
+                     "Name":  "seelen-ui.exe",
+                     "Pid":  50540,
+                     "Type":  "main",
+                     "WS_MB":  593.8,
+                     "Private_MB":  526.2,
+                     "CPU_pct":  5.049
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  32116,
+                     "Type":  "main",
+                     "WS_MB":  150.5,
+                     "Private_MB":  59.2,
+                     "CPU_pct":  0.021
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  53656,
+                     "Type":  "crashpad-handler",
+                     "WS_MB":  13,
+                     "Private_MB":  2.9,
+                     "CPU_pct":  0
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  34044,
+                     "Type":  "gpu-process",
+                     "WS_MB":  188,
+                     "Private_MB":  182.4,
+                     "CPU_pct":  0.002
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  12448,
+                     "Type":  "utility:network.mojom.NetworkService",
+                     "WS_MB":  40.4,
+                     "Private_MB":  11.2,
+                     "CPU_pct":  0.003
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  37456,
+                     "Type":  "utility:storage.mojom.StorageService",
+                     "WS_MB":  19.6,
+                     "Private_MB":  7.3,
+                     "CPU_pct":  0
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  25140,
+                     "Type":  "renderer",
+                     "WS_MB":  67.6,
+                     "Private_MB":  28.3,
+                     "CPU_pct":  0
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  16012,
+                     "Type":  "renderer",
+                     "WS_MB":  88.6,
+                     "Private_MB":  42,
+                     "CPU_pct":  0.002
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  51668,
+                     "Type":  "renderer",
+                     "WS_MB":  87,
+                     "Private_MB":  42.1,
+                     "CPU_pct":  0
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  14408,
+                     "Type":  "renderer",
+                     "WS_MB":  66.5,
+                     "Private_MB":  30.2,
+                     "CPU_pct":  0.003
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  49192,
+                     "Type":  "renderer",
+                     "WS_MB":  80.7,
+                     "Private_MB":  37.3,
+                     "CPU_pct":  0.005
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  10104,
+                     "Type":  "renderer",
+                     "WS_MB":  74.5,
+                     "Private_MB":  33,
+                     "CPU_pct":  0.003
+                 }
+             ]
+}

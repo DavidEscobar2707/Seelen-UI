@@ -212,3 +212,23 @@ Webview args/defaults: `hardware_acceleration` now defaults to `false` (software
 old values keeps them, edit it by hand to switch. Tauri `devtools` feature removed; `open_devtools` calls are `cfg(debug_assertions)` only (release
 logs a warning for `debug_open_dev_tools`). Release profile: `debug = false` (was `limited`); `lto = true`, `codegen-units = 1`, `strip = true`,
 `panic` stays unwind (the panic hook restores the taskbar).
+
+## Phase 1 results (measured 2026-10-22, plugged in, 60 s window, `scripts/lite/measure.ps1`)
+
+Sum over seelen-ui.exe + its own msedgewebview2 processes (matched by Seelen user-data-dir). CPU = % of the whole
+machine (16 logical CPUs). Raw data: `docs/measure-*.json`. Side by side: `docs/compare-phase1-dock.png`.
+
+| Run | Processes | CPU % | Working set sum MB | Private MB |
+| --- | ---: | ---: | ---: | ---: |
+| Upstream, default widgets (bar, dock, wallpaper, flyouts...) | 12 | 5.09 | 1470 | 1002 |
+| Upstream, default widgets, 5 min later | 12 | 4.99 | 1590 | 1125 |
+| Upstream, configured dock only | 7 | 0.21 | 484 | 234 |
+| Seelen Lite phase 1 (dock) | 6 | 0.18 | 377 | 129 |
+
+Baseline patches (local only, not committed): local signing key + matching public key; elevated service start
+skipped (UAC cannot be clicked unattended), so upstream numbers exclude slu-service.exe.
+
+Not met: the working-set sum (377 MB) is above 150 MB. One WebView2 surface alone is 5 processes (browser,
+renderer, network, storage, crashpad) at ~285 MB working set; working sets double-count shared DLL pages. Private
+bytes (129 MB) is under 150 MB. Tried `NetworkServiceInProcess`: one process less but private +30 MB, not kept.
+Not measured: idle power (laptop was plugged in; `BatteryStatus.DischargeRate` is only valid on battery).

@@ -1,0 +1,112 @@
+﻿{
+    "summary":  {
+                    "Label":  "baseline-defaults-2",
+                    "When":  "2026-10-22T10:56:05",
+                    "WindowSec":  60,
+                    "Processes":  12,
+                    "WebViewProcesses":  11,
+                    "Sum_WorkingSet_MB":  1590.3,
+                    "Sum_Private_MB":  1125.2,
+                    "Sum_CPU_pct_of_machine":  4.985,
+                    "OnBattery":  false,
+                    "DischargeRate_mW":  0
+                },
+    "rows":  [
+                 {
+                     "Name":  "seelen-ui.exe",
+                     "Pid":  50540,
+                     "Type":  "main",
+                     "WS_MB":  630.9,
+                     "Private_MB":  564.1,
+                     "CPU_pct":  4.831
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  32116,
+                     "Type":  "main",
+                     "WS_MB":  151.3,
+                     "Private_MB":  59.3,
+                     "CPU_pct":  0.032
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  53656,
+                     "Type":  "crashpad-handler",
+                     "WS_MB":  13.2,
+                     "Private_MB":  2.9,
+                     "CPU_pct":  0
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  34044,
+                     "Type":  "gpu-process",
+                     "WS_MB":  188.5,
+                     "Private_MB":  191.6,
+                     "CPU_pct":  0.003
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  12448,
+                     "Type":  "utility:network.mojom.NetworkService",
+                     "WS_MB":  41,
+                     "Private_MB":  11.5,
+                     "CPU_pct":  0.014
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  37456,
+                     "Type":  "utility:storage.mojom.StorageService",
+                     "WS_MB":  19.8,
+                     "Private_MB":  7.4,
+                     "CPU_pct":  0
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  25140,
+                     "Type":  "renderer",
+                     "WS_MB":  69.2,
+                     "Private_MB":  29.5,
+                     "CPU_pct":  0.006
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  16012,
+                     "Type":  "renderer",
+                     "WS_MB":  90.2,
+                     "Private_MB":  43.2,
+                     "CPU_pct":  0.008
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  51668,
+                     "Type":  "renderer",
+                     "WS_MB":  88.2,
+                     "Private_MB":  43.1,
+                     "CPU_pct":  0.005
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  14408,
+                     "Type":  "renderer",
+                     "WS_MB":  68.1,
+                     "Private_MB":  31.2,
+                     "CPU_pct":  0.003
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  49192,
+                     "Type":  "renderer",
+                     "WS_MB":  153.8,
+                     "Private_MB":  107.1,
+                     "CPU_pct":  0.075
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  10104,
+                     "Type":  "renderer",
+                     "WS_MB":  76.1,
+                     "Private_MB":  34.3,
+                     "CPU_pct":  0.008
+                 }
+             ]
+}
