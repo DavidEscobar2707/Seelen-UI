@@ -26,3 +26,5 @@ One removal per commit, so each one can be reverted alone.
   `src/static/widgets/wallpaper-manager`, its theme style, `slu wallpaper` CLI, `set_as_wallpaper` command, unused
   `WindowsApi::virtual_screen_rect`. Windows wallpaper is never touched. `virtual_desktops::wallpapers` and the
   `wallpaper_next/prev` commands stay for now (still wired to virtual desktops); settings types stay (data only).
+- Workspaces viewer: `src/ui/svelte/workspaces-viewer`, `src/static/widgets/workspaces-viewer` (incl. its shortcuts), theme style.
+  `src/background/virtual_desktops` stays (dock and weg use it). Reason: overview panel not needed for the dock.
