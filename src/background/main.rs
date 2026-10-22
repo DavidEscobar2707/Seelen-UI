@@ -18,7 +18,6 @@ mod state;
 mod tauri_context;
 mod tauri_handlers;
 mod tauri_plugins;
-mod telemetry;
 mod utils;
 mod virtual_desktops;
 mod widgets;
@@ -163,7 +162,6 @@ async fn setup(app_handle: &tauri::AppHandle<tauri::Wry>) -> Result<()> {
     SeelenUI::start().await?;
 
     warn_if_elevated(app_handle);
-    telemetry::start_telemetry();
     backups::infrastructure::start_backup_sync();
     Ok(())
 }
