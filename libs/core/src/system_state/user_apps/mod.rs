@@ -94,16 +94,6 @@ pub struct ProcessInformation {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(all(feature = "gen-binds", not(feature = "salvo")), derive(ts_rs::TS))]
-#[serde(rename_all = "camelCase")]
-pub struct UserAppWindowPreview {
-    pub hash: String,
-    pub data: String,
-    pub width: u32,
-    pub height: u32,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[cfg_attr(all(feature = "gen-binds", not(feature = "salvo")), derive(ts_rs::TS))]
 pub struct UserAppWindowColors {
     pub top: Vec<Color>,
     pub bottom: Vec<Color>,

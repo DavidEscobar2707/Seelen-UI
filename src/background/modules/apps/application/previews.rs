@@ -1,8 +1,7 @@
 use std::{collections::HashMap, sync::LazyLock, time::Duration};
 
-use base64::{Engine as _, engine::general_purpose::STANDARD};
-use image::{DynamicImage, RgbaImage};
-use seelen_core::system_state::{Color, UserAppWindowColors, UserAppWindowPreview};
+use image::RgbaImage;
+use seelen_core::system_state::{Color, UserAppWindowColors};
 use slu_utils::{Debounce, debounce};
 use win_screenshot::prelude::capture_window;
 
@@ -47,7 +46,6 @@ static CAPTURE_TX: LazyLock<crossbeam_channel::Sender<isize>> = LazyLock::new(||
 });
 
 struct UserAppWindowPreviewWrap {
-    preview: Option<UserAppWindowPreview>,
     colors: Option<UserAppWindowColors>,
     capture: Debounce<()>,
 }
@@ -59,7 +57,6 @@ pub struct WinPreviewManager {
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub enum WinPreviewEvent {
-    Captured(isize),
     ColorsUpdated(isize),
     Cleaned(isize),
 }
@@ -137,7 +134,6 @@ impl WinPreviewManager {
         self.previews.upsert(
             addr,
             UserAppWindowPreviewWrap {
-                preview: None,
                 colors: None,
                 capture,
             },
@@ -173,44 +169,10 @@ impl WinPreviewManager {
             .height
             .saturating_sub(shadow.top.unsigned_abs() + shadow.bottom.unsigned_abs());
 
-        let cropped: RgbaImage =
+        let image: RgbaImage =
             image::imageops::crop_imm(&raw, crop_x, crop_y, crop_w, crop_h).to_image();
-        let image: RgbaImage = if crop_w > 1024 || crop_h > 1024 {
-            image::imageops::thumbnail(&cropped, crop_w / 2, crop_h / 2)
-        } else {
-            cropped
-        };
 
         let colors = sample_edge_colors(&image);
-
-        let image_hash = image_to_hash(&image);
-
-        let mut unchanged = false;
-        self.previews.get(&addr, |wrap| {
-            unchanged = wrap
-                .preview
-                .as_ref()
-                .map(|p| p.hash == image_hash)
-                .unwrap_or(false);
-        });
-
-        if !unchanged {
-            let dynamic = DynamicImage::ImageRgba8(image);
-            let webp_bytes = webp::Encoder::from_image(&dynamic)
-                .map_err(|e| e.to_string())?
-                .encode(75.0);
-            let data = STANDARD.encode(&*webp_bytes);
-
-            self.previews.get(&addr, |wrap| {
-                wrap.preview = Some(UserAppWindowPreview {
-                    hash: image_hash,
-                    data,
-                    width: dynamic.width(),
-                    height: dynamic.height(),
-                });
-            });
-            Self::send(WinPreviewEvent::Captured(addr));
-        }
 
         self.previews.get(&addr, |wrap| {
             wrap.colors = Some(colors);
@@ -218,16 +180,6 @@ impl WinPreviewManager {
         Self::send(WinPreviewEvent::ColorsUpdated(addr));
 
         Ok(())
-    }
-
-    pub fn get_previews(&self) -> HashMap<isize, UserAppWindowPreview> {
-        let mut map = HashMap::new();
-        self.previews.for_each(|(k, v)| {
-            if let Some(preview) = &v.preview {
-                map.insert(*k, preview.clone());
-            }
-        });
-        map
     }
 
     pub fn get_colors(&self) -> HashMap<isize, UserAppWindowColors> {
@@ -289,11 +241,4 @@ fn sample_edge_colors(image: &RgbaImage) -> UserAppWindowColors {
         left,
         right,
     }
-}
-
-fn image_to_hash(icon_image: &image::RgbaImage) -> String {
-    use std::hash::{Hash, Hasher};
-    let mut hasher = std::hash::DefaultHasher::new();
-    icon_image.as_raw().hash(&mut hasher);
-    format!("{:x}", hasher.finish())
 }

@@ -2,7 +2,7 @@ use std::{collections::HashMap, sync::Once};
 
 use seelen_core::{
     handlers::SeelenEvent,
-    system_state::{FocusedApp, UserAppWindow, UserAppWindowColors, UserAppWindowPreview},
+    system_state::{FocusedApp, UserAppWindow, UserAppWindowColors},
 };
 use windows::Win32::UI::Shell::{IShellDispatch6, Shell};
 
@@ -29,13 +29,7 @@ fn get_apps_manager() -> &'static UserAppsManager {
         WinPreviewManager::subscribe(|event| {
             use crate::modules::apps::application::previews::WinPreviewEvent;
             match event {
-                WinPreviewEvent::Captured(_) | WinPreviewEvent::Cleaned(_) => {
-                    emit_to_webviews(
-                        SeelenEvent::UserAppWindowsPreviewsChanged,
-                        WinPreviewManager::instance().get_previews(),
-                    );
-                }
-                WinPreviewEvent::ColorsUpdated(_) => {
+                WinPreviewEvent::Cleaned(_) | WinPreviewEvent::ColorsUpdated(_) => {
                     emit_to_webviews(
                         SeelenEvent::UserAppWindowsColorsChanged,
                         WinPreviewManager::instance().get_colors(),
@@ -73,11 +67,6 @@ impl crate::tauri_handlers::Handlers {
 
     pub fn get_user_app_windows() -> Vec<UserAppWindow> {
         get_apps_manager().interactable_windows.to_vec()
-    }
-
-    pub fn get_user_app_windows_previews() -> HashMap<isize, UserAppWindowPreview> {
-        get_apps_manager();
-        WinPreviewManager::instance().get_previews()
     }
 
     pub fn get_user_app_windows_colors() -> HashMap<isize, UserAppWindowColors> {

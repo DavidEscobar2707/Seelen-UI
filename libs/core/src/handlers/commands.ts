@@ -90,7 +90,6 @@ export enum SeelenCommand {
   GetUser = "get_user",
   GetUserFolderContent = "get_user_folder_content",
   GetUserAppWindows = "get_user_app_windows",
-  GetUserAppWindowsPreviews = "get_user_app_windows_previews",
   GetUserAppWindowsColors = "get_user_app_windows_colors",
   GetMediaDevices = "get_media_devices",
   GetMediaSessions = "get_media_sessions",

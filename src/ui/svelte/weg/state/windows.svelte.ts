@@ -9,9 +9,9 @@ import {
 import { settingsState } from "./settings.svelte.ts";
 import { debounce } from "lodash";
 import type { AppOrFileWegItem } from "../types.ts";
-import { focused, interactables, previews, selfWinId, widgetStatuses, windowsColors } from "./getters.svelte.ts";
+import { focused, interactables, selfWinId, widgetStatuses, windowsColors } from "./getters.svelte.ts";
 
-export { focused, interactables, previews, widgetStatuses, windowsColors };
+export { focused, interactables, widgetStatuses, windowsColors };
 
 const widget = Widget.getCurrent();
 

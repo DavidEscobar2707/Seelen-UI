@@ -32,9 +32,6 @@ export const selfWinId = lazyRune(() => invoke(SeelenCommand.GetSelfWindowId));
 export const interactables = lazyRune(() => invoke(SeelenCommand.GetUserAppWindows));
 subscribe(SeelenEvent.UserAppWindowsChanged, interactables.setByPayload);
 
-export const previews = lazyRune(() => invoke(SeelenCommand.GetUserAppWindowsPreviews));
-subscribe(SeelenEvent.UserAppWindowsPreviewsChanged, previews.setByPayload);
-
 export const windowsColors = lazyRune<Record<number, UserAppWindowColors>>(
   () => invoke(SeelenCommand.GetUserAppWindowsColors),
 );
@@ -61,7 +58,6 @@ await Promise.all([
   settings.init(),
   selfWinId.init(),
   interactables.init(),
-  previews.init(),
   windowsColors.init(),
   focused.init(),
   widgetStatuses.init(),

@@ -7,7 +7,6 @@
   import { settingsState } from "../../state/settings.svelte.ts";
   import { windowsState, focused } from "../../state/windows.svelte.ts";
   import { getUserApplicationContextMenu, launchItem } from "../../appMenu.ts";
-  import { triggerPreviewWidget } from "../../previewWidget.ts";
   import { CssHandled } from "libs/ui/svelte/utils/animations.ts";
   import { getBadge } from "../../state/badge.svelte.ts";
   import Icon from "libs/ui/svelte/components/Icon/Icon.svelte";
@@ -32,14 +31,7 @@
     isFlashing || windows.some((w) => w.attention === WindowAttention.Highlighted),
   );
 
-  let itemEl: HTMLDivElement | null = $state(null);
-
   function onClick() {
-    if (windows.length > 1) {
-      triggerPreviewWidget(itemEl!, windows);
-      return;
-    }
-
     const win = windows[0];
     if (!win) {
       launchItem(item, false);
@@ -72,7 +64,7 @@
   }
 </script>
 
-<div bind:this={itemEl} role="menu" tabindex="0" class="weg-item-overlay">
+<div role="menu" tabindex="0" class="weg-item-overlay">
   <div
     role="menuitem"
     tabindex="0"
