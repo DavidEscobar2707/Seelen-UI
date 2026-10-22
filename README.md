@@ -1,3 +1,19 @@
+# Seelen Lite (debloated fork of Seelen UI)
+
+Seelen Lite is a minimal fork of [Seelen UI](https://github.com/eythaann/Seelen-UI) by
+[eythaann](https://github.com/eythaann) and the Seelen UI contributors. All credit for the original
+code goes to them. This fork only deletes and disables features, to keep a dock (phase 1) and a top
+bar (phase 2) with a small idle CPU, RAM and power cost on Windows 11.
+
+- License: AGPL-3.0-or-later, same as upstream (see `LICENSE`). The source of every build is this
+  repository.
+- Target look: `docs/target.png`.
+- Fork notes, removed features and measurements: `docs/lite.md`.
+
+The original upstream README follows.
+
+---
+
 <h1 align="center">
   <img src="documentation/images/logo.svg" width="44" align="top" alt="Seelen UI Logo" />
   Seelen UI
