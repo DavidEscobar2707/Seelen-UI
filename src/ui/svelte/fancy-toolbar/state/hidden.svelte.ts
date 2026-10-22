@@ -1,6 +1,7 @@
+import { SeelenEvent, subscribe } from "@seelen-ui/lib";
 import { HideMode } from "@seelen-ui/lib/types";
 import { isThisWebviewFocused, isTouchPrimary } from "libs/ui/svelte/utils/signals.svelte.ts";
-import { virtualDesktops } from "./getters.svelte.ts";
+import { mousePos, virtualDesktops } from "./getters.svelte.ts";
 import { settingsState } from "./settings.svelte.ts";
 import { systemState } from "./system.svelte.ts";
 import { windowsState } from "./windows.svelte.ts";
@@ -19,6 +20,24 @@ export const hiddenByAutohide = {
 export function setToolbarIsDraggingItem(isDragging: boolean): void {
   _isDraggingItem = isDragging;
 }
+
+// Only the auto-hide modes need the mouse position. Subscribing wakes the 10 Hz global mouse hook, so default
+// (HideMode.Never) toolbars do not subscribe at all.
+$effect.root(() => {
+  $effect(() => {
+    if (settingsState.hideMode === HideMode.Never) return;
+    let unlisten: (() => void) | null = null;
+    let cancelled = false;
+    subscribe(SeelenEvent.GlobalMouseMove, mousePos.setByPayload).then((fn) => {
+      if (cancelled) fn();
+      else unlisten = fn;
+    });
+    return () => {
+      cancelled = true;
+      unlisten?.();
+    };
+  });
+});
 
 $effect.root(() => {
   let timeout: ReturnType<typeof setTimeout> | null = null;

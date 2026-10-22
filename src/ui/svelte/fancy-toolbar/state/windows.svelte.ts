@@ -1,9 +1,8 @@
 import { Widget } from "@seelen-ui/lib";
-import { FancyToolbarSide, type UserAppWindowColors } from "@seelen-ui/lib/types";
 import { settingsState } from "./settings.svelte.ts";
-import { focused, interactables, widgetStatuses, windowsColors } from "./getters.svelte.ts";
+import { focused, interactables, widgetStatuses } from "./getters.svelte.ts";
 
-export { focused, interactables, widgetStatuses, windowsColors };
+export { focused, interactables, widgetStatuses };
 
 const widget = Widget.getCurrent();
 
@@ -40,15 +39,6 @@ const _isTbOverlapped = $derived.by(() => {
   return false;
 });
 
-const _currentMonitorMaximizedColors = $derived.by((): UserAppWindowColors | null => {
-  const monitorId = widget.decoded.monitorId;
-  const maximized = interactables.value
-    .toSorted((a, b) => b.lastForegroundAt - a.lastForegroundAt)
-    .find((w) => !w.isIconic && w.isZoomed && w.monitor === monitorId);
-  if (!maximized) return null;
-  return windowsColors.value[maximized.hwnd] ?? null;
-});
-
 class WindowsState {
   get topInteractableWindow() {
     return _topInteractableWindow;
@@ -64,33 +54,3 @@ class WindowsState {
 }
 
 export const windowsState = new WindowsState();
-
-$effect.root(() => {
-  $effect(() => {
-    const colors = _currentMonitorMaximizedColors;
-    const root = document.documentElement;
-
-    root.dataset.thereIsMaximizedOnBg = `${!!colors}`;
-
-    if (!colors) {
-      root.style.removeProperty("--window-gradient");
-      return;
-    }
-
-    const toRgba = ({ r, g, b, a }: { r: number; g: number; b: number; a: number }) =>
-      `rgba(${r},${g},${b},${(a / 255).toFixed(3)})`;
-
-    const toGradient = (stops: typeof colors.top) =>
-      `linear-gradient(to right,${
-        stops
-          .map((c, i) => `${toRgba(c)} ${((i / (stops.length - 1)) * 100).toFixed(1)}%`)
-          .join(",")
-      })`;
-
-    if (settingsState.position === FancyToolbarSide.Top) {
-      root.style.setProperty("--window-gradient", toGradient(colors.top));
-    } else {
-      root.style.setProperty("--window-gradient", toGradient(colors.bottom));
-    }
-  });
-});
