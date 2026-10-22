@@ -14,7 +14,8 @@ use windows::Win32::{
             CreateWindowExW, DEVICE_NOTIFY_WINDOW_HANDLE, DefWindowProcW, DispatchMessageW,
             GetMessageW, MSG, PostQuitMessage, RegisterClassW, RegisterShellHookWindow,
             RegisterWindowMessageW, TranslateMessage, WINDOW_EX_STYLE, WINDOW_STYLE, WM_APP,
-            WM_DESTROY, WM_WTSSESSION_CHANGE, WNDCLASSW, WTS_SESSION_LOCK, WTS_SESSION_UNLOCK,
+            WM_DESTROY, WM_ENDSESSION, WM_WTSSESSION_CHANGE, WNDCLASSW, WTS_SESSION_LOCK,
+            WTS_SESSION_UNLOCK,
         },
     },
 };
@@ -161,6 +162,11 @@ impl BgWindowProc {
             if msg == WM_DESTROY {
                 PostQuitMessage(0);
                 return LRESULT(0);
+            }
+
+            // OS shutdown/logoff: restore the native taskbar before we get killed
+            if msg == WM_ENDSESSION && w_param.0 != 0 {
+                let _ = crate::widgets::weg::native_taskbar::restore_native_taskbar();
             }
 
             // Handle session change notifications to pause background processing

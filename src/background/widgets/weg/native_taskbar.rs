@@ -1,13 +1,73 @@
 use std::{
     collections::HashSet,
     path::{Path, PathBuf},
+    sync::atomic::{AtomicBool, Ordering},
 };
 
 use seelen_core::state::WegItemData;
 use seelen_core::system_state::RelaunchArguments;
+use windows::Win32::{
+    Foundation::HWND,
+    UI::WindowsAndMessaging::{SW_HIDE, SW_SHOWNORMAL},
+};
 use winreg::{RegKey, enums::HKEY_CURRENT_USER};
 
-use crate::{error::Result, windows_api::WindowsApi};
+use crate::{
+    error::Result,
+    windows_api::{AppBarData, AppBarDataState, WindowEnumerator, WindowsApi},
+};
+
+/// Tracks whether we hid the native taskbar, so we only restore what we hid
+/// (hiding Shell_TrayWnd does not need elevation, so the app does it directly).
+static NATIVE_TASKBAR_HIDDEN: AtomicBool = AtomicBool::new(false);
+
+pub fn get_taskbars_handles() -> Result<Vec<HWND>> {
+    let mut founds = Vec::new();
+    WindowEnumerator::new().for_each(|window| {
+        let hwnd = window.hwnd();
+        let class = WindowsApi::get_class(hwnd).unwrap_or_default();
+        if (class == "Shell_TrayWnd" || class == "Shell_SecondaryTrayWnd")
+            && WindowsApi::get_window_text(hwnd).is_empty()
+        {
+            founds.push(hwnd);
+        }
+    })?;
+    Ok(founds)
+}
+
+pub fn hide_native_taskbar() {
+    NATIVE_TASKBAR_HIDDEN.store(true, Ordering::Release);
+    std::thread::spawn(|| match get_taskbars_handles() {
+        Ok(handles) => {
+            let mut attempts = 0;
+            while attempts < 10 && NATIVE_TASKBAR_HIDDEN.load(Ordering::Acquire) {
+                for hwnd in &handles {
+                    AppBarData::from_handle(*hwnd).set_state(AppBarDataState::AutoHide);
+                    let _ = WindowsApi::show_window_async(*hwnd, SW_HIDE);
+                }
+                attempts += 1;
+                std::thread::sleep(std::time::Duration::from_millis(50));
+            }
+        }
+        Err(err) => log::error!("Failed to get taskbars handles: {err:?}"),
+    });
+}
+
+/// Safe to call from the panic hook / shutdown paths: no-op if we never hid the taskbar.
+pub fn restore_native_taskbar() -> Result<()> {
+    if NATIVE_TASKBAR_HIDDEN
+        .compare_exchange(true, false, Ordering::AcqRel, Ordering::Acquire)
+        .is_err()
+    {
+        return Ok(());
+    }
+
+    for hwnd in get_taskbars_handles()? {
+        AppBarData::from_handle(hwnd).set_state(AppBarDataState::AlwaysOnTop);
+        WindowsApi::show_window_async(hwnd, SW_SHOWNORMAL)?;
+    }
+    Ok(())
+}
 
 /// Extracts the list of apps currently pinned to the native Windows taskbar.
 ///

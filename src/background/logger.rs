@@ -130,6 +130,8 @@ pub fn register_panic_hook() {
         }
 
         log::error!("A panic occurred:\n  Cause: {cause}\n  Location: {string_location}");
+        // never leave the user without a taskbar
+        let _ = crate::widgets::weg::native_taskbar::restore_native_taskbar();
         base_hook(info);
     }));
 }

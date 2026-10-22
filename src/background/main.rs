@@ -28,10 +28,9 @@ i18n!("background/i18n", fallback = "en");
 use std::sync::{OnceLock, atomic::AtomicBool};
 
 use app::SeelenUI;
-use cli::{SelfPipe, ServicePipe, handle_console_client};
+use cli::{SelfPipe, handle_console_client};
 use error::Result;
 use logger::SeelenLogger;
-use slu_ipc::messages::SvcAction;
 use tauri_handlers::register_invoke_handler;
 use tauri_plugins::register_plugins;
 use utils::{
@@ -123,9 +122,6 @@ async fn setup(app_handle: &tauri::AppHandle<tauri::Wry>) -> Result<()> {
     create_main_folders()?;
 
     SelfPipe::start_listener()?;
-    if !ServicePipe::is_running() {
-        ServicePipe::start_service().await?;
-    }
 
     if let Err(err) = utils::integrity::validate_webview_runtime() {
         match err {
@@ -174,13 +170,14 @@ fn app_callback(_: &tauri::AppHandle<tauri::Wry>, event: tauri::RunEvent) {
             Some(code) => {
                 // if exit code is 0 it means that the app was closed by the user
                 if code == 0 {
-                    ServicePipe::request(SvcAction::Stop).log_error();
+                    widgets::weg::native_taskbar::restore_native_taskbar().log_error();
                 }
             }
             // prevent close background on webview windows closing
             None => api.prevent_exit(),
         },
         tauri::RunEvent::Exit => {
+            widgets::weg::native_taskbar::restore_native_taskbar().log_error();
             log::info!("───────────────────── Exiting Seelen UI ─────────────────────");
         }
         _ => {}

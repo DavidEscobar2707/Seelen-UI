@@ -3,7 +3,6 @@ pub mod event;
 
 use seelen_core::state::WorkspaceId;
 use seelen_core::{rect::Rect, system_state::MonitorId};
-use slu_ipc::messages::SvcAction;
 use std::sync::Arc;
 use std::sync::atomic::Ordering;
 use std::{
@@ -23,11 +22,8 @@ use windows::{
     },
 };
 
-use crate::hook::HookManager;
 use crate::virtual_desktops::VdManager;
-use crate::windows_api::window::event::WinEvent;
 use crate::{
-    cli::ServicePipe,
     error::Result,
     modules::{apps::application::is_interactable_window, start::application::StartMenuManager},
     utils::lock_free::TracedMutex,
@@ -354,43 +350,16 @@ impl Window {
     }
 
     pub fn show_window(&self, command: SHOW_WINDOW_CMD) -> Result<()> {
-        if self.is_manageable_from_unelevated() {
-            WindowsApi::show_window(self.hwnd(), command)
-        } else {
-            ServicePipe::request(SvcAction::ShowWindow {
-                hwnd: self.address(),
-                command: command.0,
-            })
-        }
+        WindowsApi::show_window(self.hwnd(), command)
     }
 
     pub fn show_window_async(&self, command: SHOW_WINDOW_CMD) -> Result<()> {
-        if self.is_manageable_from_unelevated() {
-            WindowsApi::show_window_async(self.hwnd(), command)
-        } else {
-            ServicePipe::request(SvcAction::ShowWindowAsync {
-                hwnd: self.address(),
-                command: command.0,
-            })
-        }
+        WindowsApi::show_window_async(self.hwnd(), command)
     }
 
     #[allow(dead_code)]
     pub fn set_position(&self, rect: &RECT, flags: SET_WINDOW_POS_FLAGS) -> Result<()> {
-        if self.is_manageable_from_unelevated() {
-            WindowsApi::set_position(self.hwnd(), None, rect, flags)
-        } else {
-            ServicePipe::request(SvcAction::SetWindowPosition {
-                hwnd: self.address(),
-                rect: Rect {
-                    top: rect.top,
-                    left: rect.left,
-                    right: rect.right,
-                    bottom: rect.bottom,
-                },
-                flags: flags.0,
-            })
-        }
+        WindowsApi::set_position(self.hwnd(), None, rect, flags)
     }
 
     pub fn unminimize(&self) -> Result<()> {
@@ -404,17 +373,7 @@ impl Window {
         if self.is_minimized() {
             return Ok(());
         }
-        if Window::get_foregrounded().is_manageable_from_unelevated() {
-            WindowsApi::set_foreground(self.hwnd())
-        } else {
-            ServicePipe::request_sync(SvcAction::SetForeground(self.address()))?;
-            if WindowsApi::get_foreground_window() == self.hwnd() {
-                HookManager::send((WinEvent::SystemForeground, *self));
-                Ok(())
-            } else {
-                Err("Failed to set foreground window".into())
-            }
-        }
+        WindowsApi::set_foreground(self.hwnd())
     }
 
     pub fn is_dragging(&self) -> bool {

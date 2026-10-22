@@ -1,10 +1,7 @@
 mod debugger;
 mod self_pipe;
-pub mod shortcuts;
-mod svc_pipe;
 
 pub use self_pipe::SelfPipe;
-pub use svc_pipe::ServicePipe;
 
 use std::sync::atomic::Ordering;
 
@@ -69,9 +66,6 @@ pub async fn process_app_command(cmd: AppCommand) -> Result<()> {
         }
         AppCommand::Resource(command) => {
             resources_cli::process(command).await?;
-        }
-        AppCommand::ToggleShortcutsPause => {
-            shortcuts::toggle_pause()?;
         }
         _ => {
             return Err("Command does not support instance execution".into());

@@ -1,14 +1,10 @@
 use std::sync::atomic::Ordering;
 
-use slu_ipc::messages::SvcAction;
 use tauri::{AppHandle, Emitter, Wry};
-use windows::Win32::System::TaskScheduler::{ITaskService, TaskScheduler};
-
-use seelen_core::state::shortcuts::resolve_shortcuts;
+use winreg::{RegKey, enums::HKEY_CURRENT_USER};
 
 use crate::{
     APP_HANDLE,
-    cli::ServicePipe,
     error::{Result, ResultLogExt},
     hook::register_win_hook,
     migrations::Migrations,
@@ -16,11 +12,11 @@ use crate::{
     resources::RESOURCES,
     state::application::{AppSettings, FULL_STATE, initialize_user_resources_watcher},
     widgets::{manager::WIDGET_MANAGER, weg::SeelenWeg},
-    windows_api::{
-        Com,
-        event_window::{IS_INTERACTIVE_SESSION, create_background_window},
-    },
+    windows_api::event_window::{IS_INTERACTIVE_SESSION, create_background_window},
 };
+
+const AUTOSTART_KEY: &str = "Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+const AUTOSTART_VALUE: &str = "SeelenLite";
 
 /// Tauri app handle
 pub fn get_app_handle<'a>() -> &'a AppHandle<Wry> {
@@ -97,29 +93,11 @@ impl SeelenUI {
 
         initialize_user_resources_watcher()?;
 
-        let widgets = RESOURCES.widgets();
-        let widget_refs: Vec<_> = widgets.iter().map(|w| w.as_ref()).collect();
-        let (resolved, _) = resolve_shortcuts(&state.settings, &widget_refs);
-
-        if !crate::cli::shortcuts::SHORTCUTS_PAUSED.load(std::sync::atomic::Ordering::Acquire) {
-            ServicePipe::request(SvcAction::SetShortcuts(resolved))?;
-        }
-
         Ok(())
     }
 
     pub fn on_settings_change(state: &AppSettings) -> Result<()> {
         rust_i18n::set_locale(state.locale());
-
-        let widgets = RESOURCES.widgets();
-        let widget_refs: Vec<_> = widgets.iter().map(|w| w.as_ref()).collect();
-        let (resolved, has_conflicts) = resolve_shortcuts(&state.settings, &widget_refs);
-        if has_conflicts {
-            log::warn!("Some configured shortcuts conflict with each other, check settings.json");
-        }
-        if !crate::cli::shortcuts::SHORTCUTS_PAUSED.load(std::sync::atomic::Ordering::Acquire) {
-            ServicePipe::request(SvcAction::SetShortcuts(resolved))?;
-        }
 
         if state.is_weg_enabled() {
             SeelenWeg::hide_native_taskbar();
@@ -132,27 +110,20 @@ impl SeelenUI {
         Ok(())
     }
 
+    /// Autostart lives in HKCU\...\Run (no admin, no Task Scheduler).
     pub fn is_auto_start_enabled() -> Result<bool> {
-        Com::run_with_context(|| unsafe {
-            let task_service: ITaskService = Com::create_instance(&TaskScheduler)?;
-            task_service.Connect(
-                &Default::default(),
-                &Default::default(),
-                &Default::default(),
-                &Default::default(),
-            )?;
-            let is_task_enabled = task_service
-                .GetFolder(&"\\Seelen".into())
-                .and_then(|folder| folder.GetTask(&"Seelen UI Service".into()))
-                .and_then(|task| task.Definition())
-                .and_then(|definition| definition.Triggers())
-                .and_then(|triggers| triggers.get_Item(1))
-                .is_ok();
-            Ok(is_task_enabled)
-        })
+        let run = RegKey::predef(HKEY_CURRENT_USER).open_subkey(AUTOSTART_KEY)?;
+        Ok(run.get_value::<String, _>(AUTOSTART_VALUE).is_ok())
     }
 
     pub fn set_auto_start(enabled: bool) -> Result<()> {
-        ServicePipe::request(SvcAction::SetStartup(enabled))
+        let (run, _) = RegKey::predef(HKEY_CURRENT_USER).create_subkey(AUTOSTART_KEY)?;
+        if enabled {
+            let exe = std::env::current_exe()?;
+            run.set_value(AUTOSTART_VALUE, &format!("\"{}\"", exe.display()))?;
+        } else if run.get_value::<String, _>(AUTOSTART_VALUE).is_ok() {
+            run.delete_value(AUTOSTART_VALUE)?;
+        }
+        Ok(())
     }
 }

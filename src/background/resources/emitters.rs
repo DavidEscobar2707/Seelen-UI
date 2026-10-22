@@ -3,15 +3,12 @@ use std::sync::Arc;
 use seelen_core::{
     handlers::SeelenEvent,
     resource::ResourceKind,
-    state::{Theme, Widget, settings::shortcuts::resolve_shortcuts},
+    state::{Theme, Widget},
 };
-use slu_ipc::messages::SvcAction;
 
 use crate::{
     app::emit_to_webviews,
-    cli::ServicePipe,
     error::{Result, ResultLogExt},
-    state::application::FULL_STATE,
     widgets::manager::WIDGET_MANAGER,
     widgets::permissions::WIDGET_PERMISSIONS,
 };
@@ -78,16 +75,6 @@ impl ResourceManager {
         WIDGET_PERMISSIONS.remove_uninstalled_widgets().log_error();
 
         WIDGET_MANAGER.reconcile()?;
-
-        let state = FULL_STATE.load();
-        let widget_refs: Vec<_> = widgets.iter().map(|w| w.as_ref()).collect();
-        let (resolved, has_conflicts) = resolve_shortcuts(&state.settings, &widget_refs);
-        if has_conflicts {
-            log::warn!("Some configured shortcuts conflict with each other, check settings.json");
-        }
-        if !crate::cli::shortcuts::SHORTCUTS_PAUSED.load(std::sync::atomic::Ordering::Acquire) {
-            ServicePipe::request(SvcAction::SetShortcuts(resolved))?;
-        }
         Ok(())
     }
 

@@ -161,3 +161,11 @@ Notes: an `AppOrFile` without `umid` (or whose path is a `.lnk`) is dropped on l
   `remark-parse`, `remark-rehype`, `rehype-stringify`, `esbuild-css-modules-plugin`, `@types/react-dom`. Done with `npm uninstall --package-lock-only` so the shared
   `node_modules` junction (main checkout, baseline build) is not modified; run `npm install`/`npm ci` here to prune it. `react-icons` + `real-react-dom` stay (icon
   extraction step). `tsconfig.json` drops the preact JSX/paths config. `windows` crate features were not touched.
+- Elevated service (`slu-service`): `src/service` (hotkeys, Task Scheduler task, elevated window helpers), `ServicePipe` + `start_service`, `libs/slu-ipc`
+  `service.rs`/`SvcAction`, global shortcuts handling (`resolve_shortcuts` calls, `cli/shortcuts.rs`, `ToggleShortcutsPause` instance command), the
+  `positioning` dependency of `src`, the `service.*` i18n strings. No UAC prompt at startup. The app now hides/restores `Shell_TrayWnd` itself
+  (`widgets/weg/native_taskbar.rs`); restore runs on exit, panic hook, `WM_ENDSESSION` and when the dock is disabled. A hard kill (taskkill /F, crash
+  without unwinding) leaves the taskbar hidden until explorer restarts or the app runs again with the dock disabled. Windows of elevated processes
+  can no longer be shown/moved/focused (calls just fail and log). Autostart is `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` value `SeelenLite`
+  (`set_auto_start`/`get_auto_start_status`); the old `\Seelen\Seelen UI Service` task is never read or touched. NSIS/AppX templates and
+  `scripts/bundle.msix.ts` still mention `slu-service.exe` (bundling is not used by the fork; fix before building an installer).

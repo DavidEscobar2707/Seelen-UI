@@ -17,17 +17,12 @@ path = "background/main.rs"
 name = "slu"
 path = "slu/main.rs"
 
-[[bin]]
-name = "slu-service"
-path = "service/main.rs"
-
 [build-dependencies]
 tauri-build = { workspace = true, features = [] }
 
 [dependencies]
 slu-ipc = { workspace = true }
 slu-utils = { workspace = true }
-positioning = { workspace = true }
 tauri = { workspace = true, features = ["devtools", "protocol-asset"] }
 tauri-plugin-dialog = { workspace = true }
 serde = { workspace = true, features = ["derive"] }

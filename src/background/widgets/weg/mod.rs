@@ -3,11 +3,7 @@ pub mod handler;
 pub mod hook;
 pub mod native_taskbar;
 
-use slu_ipc::messages::SvcAction;
-
-use crate::{
-    cli::ServicePipe, error::Result, state::application::FULL_STATE, windows_api::monitor::Monitor,
-};
+use crate::{error::Result, state::application::FULL_STATE, windows_api::monitor::Monitor};
 
 pub static TASKBAR_CLASS: [&str; 2] = ["Shell_TrayWnd", "Shell_SecondaryTrayWnd"];
 
@@ -22,20 +18,14 @@ impl SeelenWeg {
         Ok(total_size)
     }
 
-    // ====================
-    // TASKBAR HIDDEN LOGIC
-    // ====================
-    //
-    // The actual hide/restore of the native taskbar is performed by the service
-    // (see src/service/shutdown.rs), which owns the "was it hidden" flag so it can
-    // safely restore on shutdown even if the main app crashes. This app only
-    // requests the action via IPC.
+    // The native taskbar is hidden/restored by this process (see native_taskbar.rs).
+    // It is restored on exit, panic, WM_ENDSESSION and when the dock is disabled.
 
     pub fn hide_native_taskbar() {
-        let _ = ServicePipe::request(SvcAction::HideNativeTaskbar);
+        native_taskbar::hide_native_taskbar();
     }
 
     pub fn restore_native_taskbar() -> Result<()> {
-        ServicePipe::request(SvcAction::RestoreNativeTaskbar)
+        native_taskbar::restore_native_taskbar()
     }
 }

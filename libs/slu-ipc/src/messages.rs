@@ -1,9 +1,3 @@
-use std::collections::HashMap;
-
-use seelen_core::{
-    rect::Rect,
-    state::{Settings, shortcuts::ResolvedShortcut},
-};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -64,54 +58,6 @@ impl AppMessage {
         )
     }
 
-    pub fn from_bytes(bytes: &[u8]) -> Result<Self> {
-        Ok(serde_json::from_slice(bytes)?)
-    }
-
-    pub fn to_bytes(&self) -> Result<Vec<u8>> {
-        Ok(serde_json::to_vec(self)?)
-    }
-}
-
-// ==============================================
-
-/// Seelen UI Service Actions
-#[allow(dead_code)]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum SvcAction {
-    Stop,
-    SetStartup(bool),
-    SetSettings(Box<Settings>),
-    /// Sends the resolved shortcuts list to the service for hotkey registration.
-    /// Pass an empty `Vec` to unregister all hotkeys (e.g. when shortcuts are disabled).
-    SetShortcuts(Vec<ResolvedShortcut>),
-    ShowWindow {
-        hwnd: isize,
-        command: i32,
-    },
-    ShowWindowAsync {
-        hwnd: isize,
-        command: i32,
-    },
-    SetWindowPosition {
-        hwnd: isize,
-        rect: Rect,
-        flags: u32,
-    },
-    DeferWindowPositions {
-        list: HashMap<isize, Rect>,
-        animated: bool,
-        animation_duration: u64,
-        easing: String,
-    },
-    SetForeground(isize),
-    StartShortcutRegistration,
-    StopShortcutRegistration,
-    HideNativeTaskbar,
-    RestoreNativeTaskbar,
-}
-
-impl SvcAction {
     pub fn from_bytes(bytes: &[u8]) -> Result<Self> {
         Ok(serde_json::from_slice(bytes)?)
     }
