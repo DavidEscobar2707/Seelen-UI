@@ -44,5 +44,6 @@ async function completeTranslationsFor(localesDir: string) {
 }
 
 await completeTranslationsFor("src/ui/svelte/weg/i18n/translations");
+await completeTranslationsFor("src/ui/svelte/fancy-toolbar/i18n/translations");
 
 await completeTranslationsFor("src/background/i18n");

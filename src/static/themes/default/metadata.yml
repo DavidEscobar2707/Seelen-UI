@@ -4,10 +4,12 @@ metadata:
   description: !extend i18n/description.yml
   tags:
     - weg
+    - toolbar
 styles:
   # For devs: key is the id of the target widget and value is the relative path to the style.
   # For third-party widgets uses the real widget id, friendly ids are only for bundle or local themes,
   # as friendly ids are not stable.
+  "@seelen/fancy-toolbar": !include styles/fancy-toolbar.scss
   "@seelen/weg": !include styles/weg.scss
   "@seelen/context-menu": !include styles/context-menu.scss
   "@seelen/tooltip": !include styles/tooltip.scss

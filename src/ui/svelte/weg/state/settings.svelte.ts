@@ -1,5 +1,5 @@
 import { invoke, RuntimeStyleSheet, SeelenCommand, Widget } from "@seelen-ui/lib";
-import { Alignment, HideMode, SeelenWegSide } from "@seelen-ui/lib/types";
+import { Alignment, FancyToolbarSide, HideMode, SeelenWegSide } from "@seelen-ui/lib/types";
 import { isTouchPrimary } from "libs/ui/svelte/utils";
 import { locale } from "../i18n/index.ts";
 import { declareDocumentAsLayeredHitbox } from "libs/ui/react/utils/layered.ts";
@@ -11,9 +11,30 @@ import { rootEffectAsync } from "libs/ui/svelte/utils/RootEffect.svelte.ts";
 let isWidgetReady = $state(false);
 const settings = $derived(_settings.value.byWidget["@seelen/weg"]);
 
-// Phase 1 has no top bar, so the dock works on the whole monitor rect.
-// (phase 2: reverting the toolbar removal commit restores the toolbar offset here)
-const workArea = $derived(systemState.currentMonitor.rect);
+const workArea = $derived.by(() => {
+  const workArea = systemState.currentMonitor.rect;
+  const tbConfig = _settings.value.byWidget["@seelen/fancy-toolbar"];
+  const tbMonitorConfig = (_settings.value.monitorsV3[systemState.currentMonitor.id] as any)
+    ?.byWidget?.["@seelen/fancy-toolbar"] || { enabled: true };
+
+  if (!tbConfig?.enabled || !tbMonitorConfig?.enabled) {
+    return workArea;
+  }
+
+  const tbSize = Math.round(
+    (tbConfig.itemSize + tbConfig.padding * 2 + tbConfig.margin * 2) *
+      systemState.currentMonitor.scaleFactor,
+  );
+
+  switch (tbConfig.position) {
+    case FancyToolbarSide.Top:
+      return { ...workArea, top: workArea.top + tbSize };
+    case FancyToolbarSide.Bottom:
+      return { ...workArea, bottom: workArea.bottom - tbSize };
+  }
+
+  return workArea;
+});
 
 const widgetRect = $derived.by(() => {
   const wa = workArea;
