@@ -1,15 +1,15 @@
-use std::{collections::HashMap, sync::Once};
+use std::sync::Once;
 
 use seelen_core::{
     handlers::SeelenEvent,
-    system_state::{FocusedApp, UserAppWindow, UserAppWindowColors},
+    system_state::{FocusedApp, UserAppWindow},
 };
 use windows::Win32::UI::Shell::{IShellDispatch6, Shell};
 
 use crate::{
     app::emit_to_webviews,
     error::Result,
-    modules::apps::application::{UserAppsManager, previews::WinPreviewManager},
+    modules::apps::application::UserAppsManager,
     widgets::permissions::{WidgetPerm, request_widget_permission},
     windows_api::{Com, input::Mouse, window::Window},
 };
@@ -24,18 +24,6 @@ fn get_apps_manager() -> &'static UserAppsManager {
                 SeelenEvent::UserAppWindowsChanged,
                 UserAppsManager::instance().interactable_windows.to_vec(),
             );
-        });
-
-        WinPreviewManager::subscribe(|event| {
-            use crate::modules::apps::application::previews::WinPreviewEvent;
-            match event {
-                WinPreviewEvent::Cleaned(_) | WinPreviewEvent::ColorsUpdated(_) => {
-                    emit_to_webviews(
-                        SeelenEvent::UserAppWindowsColorsChanged,
-                        WinPreviewManager::instance().get_colors(),
-                    );
-                }
-            }
         });
     });
     UserAppsManager::instance()
@@ -67,11 +55,6 @@ impl crate::tauri_handlers::Handlers {
 
     pub fn get_user_app_windows() -> Vec<UserAppWindow> {
         get_apps_manager().interactable_windows.to_vec()
-    }
-
-    pub fn get_user_app_windows_colors() -> HashMap<isize, UserAppWindowColors> {
-        get_apps_manager();
-        WinPreviewManager::instance().get_colors()
     }
 
     /// This function is called show_desktop but acts more like minimize_all

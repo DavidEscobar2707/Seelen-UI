@@ -77,7 +77,6 @@ slu_events_declaration! {
     @queued()
     UserFolderChanged(FolderChangedArgs) as "user::known-folder-changed",
     UserAppWindowsChanged(Vec<UserAppWindow>) as "user::windows-changed",
-    UserAppWindowsColorsChanged(HashMap<isize, UserAppWindowColors>) as "user::windows-colors-changed",
 
     MediaSessions(Vec<MediaPlayer>) as "media-sessions",
     MediaDevices([Vec<MediaDevice>; 2]) as "media::devices",

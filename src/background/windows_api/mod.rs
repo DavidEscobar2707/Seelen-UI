@@ -883,18 +883,6 @@ impl WindowsApi {
         Ok(Self::monitor_info(hmonitor)?.monitorInfo.rcMonitor)
     }
 
-    /// returns the difference between outer window rect and inner window rect
-    pub fn shadow_rect(hwnd: HWND) -> Result<RECT> {
-        let outer_rect = Self::get_outer_window_rect(hwnd)?;
-        let inner_rect = Self::get_inner_window_rect(hwnd)?;
-        Ok(RECT {
-            left: outer_rect.left - inner_rect.left,
-            top: outer_rect.top - inner_rect.top,
-            right: outer_rect.right - inner_rect.right,
-            bottom: outer_rect.bottom - inner_rect.bottom,
-        })
-    }
-
     pub fn _get_virtual_desktop_manager() -> Result<IVirtualDesktopManager> {
         Com::create_instance(&VirtualDesktopManager)
     }

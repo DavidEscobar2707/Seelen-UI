@@ -362,7 +362,6 @@ slu_commands_declaration! {
     GetUser = get_user() -> User,
     GetUserFolderContent = get_user_folder_content(folder_type: FolderType) -> Vec<std::path::PathBuf>,
     GetUserAppWindows = get_user_app_windows() -> Vec<UserAppWindow>,
-    GetUserAppWindowsColors = get_user_app_windows_colors() -> std::collections::HashMap<isize, UserAppWindowColors>,
 
     // Media
     GetMediaDevices =

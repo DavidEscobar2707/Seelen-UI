@@ -174,3 +174,6 @@ Notes: an `AppOrFile` without `umid` (or whose path is a `.lnk`) is dropped on l
   Per-webview tauri events stay (`WidgetTriggered`, liveness ping, context-menu callbacks). The salvo `oapi` feature stays: `seelen-core` types derive
   `ToSchema` under the `salvo` feature and the `/ping`/themes endpoints use it; dropping it is a separate refactor (the Scalar page is served from
   an embedded 1-file html, no extra dependency).
+- Window pixel capture: `modules/apps/application/previews.rs` (`WinPreviewManager`, 200 ms `capture_window` + edge-color sampling), command
+  `get_user_app_windows_colors`, event `user::windows-colors-changed`, `UserAppWindowColors` type, the `win-screenshot` dependency and the
+  dock `--window-gradient` / `data-there-is-maximized-on-bg` tinting (the dock now always uses theme colors).

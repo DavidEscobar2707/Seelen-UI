@@ -1,17 +1,15 @@
 import { SeelenEvent, subscribe, Widget } from "@seelen-ui/lib";
 import {
   type FocusedApp,
-  SeelenWegSide,
   type UserAppWindow,
-  type UserAppWindowColors,
   WegTemporalItemsVisibility,
 } from "@seelen-ui/lib/types";
 import { settingsState } from "./settings.svelte.ts";
 import { debounce } from "lodash";
 import type { AppOrFileWegItem } from "../types.ts";
-import { focused, interactables, selfWinId, widgetStatuses, windowsColors } from "./getters.svelte.ts";
+import { focused, interactables, selfWinId, widgetStatuses } from "./getters.svelte.ts";
 
-export { focused, interactables, widgetStatuses, windowsColors };
+export { focused, interactables, widgetStatuses };
 
 const widget = Widget.getCurrent();
 
@@ -41,15 +39,6 @@ const _topInteractableWindow = $derived(
     .toSorted((a, b) => b.lastForegroundAt - a.lastForegroundAt)
     .find((w) => w.monitor === widget.decoded.monitorId && !w.isIconic),
 );
-
-const _currentMonitorMaximizedColors = $derived.by((): UserAppWindowColors | null => {
-  const monitorId = widget.decoded.monitorId;
-  const maximized = interactables.value
-    .toSorted((a, b) => b.lastForegroundAt - a.lastForegroundAt)
-    .find((w) => !w.isIconic && w.isZoomed && w.monitor === monitorId);
-  if (!maximized) return null;
-  return windowsColors.value[maximized.hwnd] ?? null;
-});
 
 const _isDockOverlapped = $derived.by(() => {
   // If foreground is not in interactable windows, return false directly, this handled start menu or desktop focus cases.
@@ -108,45 +97,3 @@ export function getWindowsForItem(
     return winPath !== "" && (itemCommand === winPath || itemPath === winPath);
   });
 }
-
-$effect.root(() => {
-  $effect(() => {
-    const colors = _currentMonitorMaximizedColors;
-    const root = document.documentElement;
-
-    root.dataset.thereIsMaximizedOnBg = `${!!colors}`;
-
-    if (!colors) {
-      root.style.removeProperty("--window-gradient");
-      return;
-    }
-
-    const toRgba = ({ r, g, b, a }: { r: number; g: number; b: number; a: number }) =>
-      `rgba(${r},${g},${b},${(a / 255).toFixed(3)})`;
-
-    const toHGradient = (stops: typeof colors.top) =>
-      `linear-gradient(to right,${
-        stops
-          .map((c, i) => `${toRgba(c)} ${((i / (stops.length - 1)) * 100).toFixed(1)}%`)
-          .join(",")
-      })`;
-
-    const toVGradient = (stops: typeof colors.left) =>
-      `linear-gradient(to bottom,${
-        stops
-          .map((c, i) => `${toRgba(c)} ${((i / (stops.length - 1)) * 100).toFixed(1)}%`)
-          .join(",")
-      })`;
-
-    const pos = settingsState.position;
-    if (pos === SeelenWegSide.Top) {
-      root.style.setProperty("--window-gradient", toHGradient(colors.top));
-    } else if (pos === SeelenWegSide.Bottom) {
-      root.style.setProperty("--window-gradient", toHGradient(colors.bottom));
-    } else if (pos === SeelenWegSide.Left) {
-      root.style.setProperty("--window-gradient", toVGradient(colors.left));
-    } else {
-      root.style.setProperty("--window-gradient", toVGradient(colors.right));
-    }
-  });
-});

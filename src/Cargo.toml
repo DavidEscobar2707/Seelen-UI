@@ -46,7 +46,6 @@ winreg = { workspace = true }
 windows-core = { workspace = true } # windows-rs already depends and reexports this, but we need it as a direct dependency (implement macro)
 windows-collections = { workspace = true }
 windows-future = { workspace = true }
-win-screenshot = { workspace = true }
 base64 = { workspace = true }
 webp = { workspace = true }
 webview2-com = { workspace = true }

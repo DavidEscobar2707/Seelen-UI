@@ -5219,7 +5219,6 @@ dependencies = [
  "webview2-com",
  "widestring",
  "win-hotkeys",
- "win-screenshot",
  "windows 0.62.2",
  "windows-collections 0.3.2",
  "windows-core 0.62.2",
@@ -7191,15 +7190,6 @@ dependencies = [
  "serde",
  "thiserror 2.0.21",
  "windows 0.60.0",
-]
-
-[[package]]
-name = "win-screenshot"
-version = "4.0.14"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e46fb2d7cb00430b7c433b05cc37a0f2f03a5305a975b1886a6ce5e1d8977d4b"
-dependencies = [
- "windows 0.62.2",
 ]
 
 [[package]]

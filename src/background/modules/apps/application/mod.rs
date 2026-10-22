@@ -2,7 +2,6 @@ mod badges;
 mod flashing;
 pub mod msix;
 pub mod msix_manifest;
-pub mod previews;
 mod windows;
 
 pub use badges::WindowBadges;
