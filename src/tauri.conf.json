@@ -84,30 +84,11 @@
           "vietnamese"
         ]
       }
-    },
-    "fileAssociations": [
-      {
-        "ext": [
-          ".slu"
-        ],
-        "name": "seelen-ui.file",
-        "description": "Seelen UI File",
-        "mimeType": "text/plain",
-        "role": "Viewer"
-      }
-    ]
+    }
   },
   "plugins": {
     "updater": {
       "pubkey": ""
-    },
-    "deep-link": {
-      "mobile": [],
-      "desktop": {
-        "schemes": [
-          "seelen-ui.uri"
-        ]
-      }
     }
   }
 }

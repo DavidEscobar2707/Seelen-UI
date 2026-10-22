@@ -2,14 +2,13 @@ mod debugger;
 mod self_pipe;
 pub mod shortcuts;
 mod svc_pipe;
-mod uri;
 
 pub use self_pipe::SelfPipe;
 pub use svc_pipe::ServicePipe;
 
 use std::sync::atomic::Ordering;
 
-use slu_ipc::{AppIpc, commands::AppCommand, messages::AppMessage};
+use slu_ipc::commands::AppCommand;
 
 use crate::{
     error::Result,
@@ -28,12 +27,9 @@ struct MainCli {
     silent: bool,
     #[arg(long, default_value_t)]
     verbose: bool,
-    /// Path or URI to open (e.g. from the Windows protocol handler).
-    uri: Option<String>,
 }
 
-/// Called at startup by the main executable. If a URI is present it is forwarded
-/// to the running instance via IPC and the process exits; otherwise returns Ok(())
+/// Called at startup by the main executable. Parses the flags and returns Ok(())
 /// so normal app startup continues.
 pub async fn handle_console_client() -> Result<()> {
     use clap::Parser;
@@ -49,13 +45,6 @@ pub async fn handle_console_client() -> Result<()> {
         crate::VERBOSE.store(true, Ordering::SeqCst);
         println!("Received args: {:#?}", std::env::args().collect::<Vec<_>>());
         println!("Parsed CLI: {cli:#?}");
-    }
-
-    if let Some(uri) = cli.uri {
-        AppIpc::send(AppMessage::OpenUri(uri))
-            .await
-            .map_err(|_| "Can't establish connection, ensure Seelen UI is running.")?;
-        std::process::exit(0);
     }
 
     Ok(())

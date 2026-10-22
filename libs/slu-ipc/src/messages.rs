@@ -46,8 +46,6 @@ pub enum AppMessage {
     /// Raw command line messages
     Cli(Vec<String>),
     Command(AppCommand),
-    /// Open a URI or file path in the main instance
-    OpenUri(String),
     /// System tray change event
     TrayChanged(Win32TrayEvent),
     /// Taskbar button change event (`ITaskbarList3` calls captured by the hook)

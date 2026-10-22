@@ -6,8 +6,8 @@ use slu_ipc::{
 };
 
 use crate::{
-    cli::{process_app_command, uri::process_uri},
-    error::{Result, ResultLogExt},
+    cli::process_app_command,
+    error::Result,
     modules::{apps::application::WindowBadges, system_tray::SystemTrayManager},
 };
 
@@ -53,11 +53,6 @@ impl SelfPipe {
                     log::error!("Failed to process command: {err}");
                     return IpcResponse::Err(err.to_string());
                 }
-            }
-            AppMessage::OpenUri(uri) => {
-                tokio::spawn(async move {
-                    process_uri(&uri).await.log_error();
-                });
             }
             AppMessage::TrayChanged(event) => {
                 SystemTrayManager::handle_tray_event(event);
