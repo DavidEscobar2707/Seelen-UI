@@ -306,3 +306,26 @@ Not met: working-set sum 434 MB and private 173 MB are above 150 MB (WebView2 fl
   missed test (not reproduced live): a *maximized* borderless window only fills the work area, which our own app bars shrink, so it never matched the
   monitor rect; a window covering the whole monitor does. If the live retest still shows no log, check `WS_CAPTION`/`WS_THICKFRAME` on that window.
   Unit tests cover the pure rect comparison.
+
+## Live tests (2026-10-22, release build 3f3a4b3f + startup fix)
+
+| Test | Result |
+| --- | --- |
+| Right-click dock item | context-menu webview created on open, destroyed ("dropped") on close |
+| Hover dock item | tooltip webview created, destroyed ~1 s later |
+| Display off / on | `Display off` / `Display on` logged, pause flag follows |
+| Fullscreen app focused (borderless window covering the monitor) | `Fullscreen app focused: true`, then `false` on close |
+| Hard kill (`Stop-Process -Force`) | `slu taskbar-watchdog` restored the taskbar to its saved state (normal), then exited |
+| explorer.exe killed and restarted | taskbar stays hidden, app stays alive |
+| Startup on a busy machine | upstream aborted the app when the WebView2 test window took > 3 s; now only a failed webview build is fatal |
+
+Found and fixed during these tests: taskbar left in auto-hide after a hard kill (watchdog), fullscreen not detected
+(monitor-rect test), startup abort under load. Open: one unexplained silent exit of the phase 2 build after ~15 min
+(no log, no crash report); the soak script now records the exit code to catch it.
+
+## Install
+
+`npm run tauri build` (or `tauri build`) makes a per-user NSIS installer in `target\release\bundle\nsis`. No
+admin rights, no service, no scheduled task. The installer sets autostart in
+`HKCU\Software\Microsoft\Windows\CurrentVersion\Run` (`SeelenLite`); the uninstaller removes it. Config stays in
+`%APPDATA%\com.seelen.seelen-ui`.

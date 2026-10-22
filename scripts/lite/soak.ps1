@@ -1,8 +1,7 @@
 param([int]$Minutes=60)
 $out='C:\Users\USUARIO\Desktop\seelen-lite-wt\docs\soak-phase2.csv'
-$exe='C:\Users\USUARIO\Desktop\seelen-lite-wt\target\release\seelen-ui.exe'
-$app=Start-Process -FilePath $exe -WorkingDirectory (Split-Path $exe) -PassThru
-Start-Sleep 60
+$app=Get-Process seelen-ui -ea 0 | Select-Object -First 1
+if(-not $app){ $exe="$env:LOCALAPPDATA\Seelen\Seelen Lite\seelen-ui.exe"; $app=Start-Process -FilePath $exe -WorkingDirectory (Split-Path $exe) -PassThru; Start-Sleep 60 }
 "time,seelen_ws_mb,seelen_priv_mb,webview_ws_mb,webview_priv_mb,procs,cpu_pct_5min" | Set-Content $out
 $cores=(Get-CimInstance Win32_Processor | Measure-Object NumberOfLogicalProcessors -Sum).Sum
 $prev=$null; $prevT=$null
