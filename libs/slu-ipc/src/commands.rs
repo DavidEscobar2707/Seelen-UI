@@ -41,7 +41,6 @@ pub enum AppCommand {
     Widget(WidgetCli),
     Resource(ResourceManagerCli),
     Art(ArtCli),
-    TaskSwitcher(TaskSwitcherClient),
     /// Toggle the global shortcuts pause state
     ToggleShortcutsPause,
 }
@@ -287,24 +286,4 @@ pub enum Direction {
     Right,
     Up,
     Down,
-}
-
-// ===== TaskSwitcher =====
-
-#[derive(Debug, Serialize, Deserialize, clap::Args)]
-pub struct TaskSwitcherClient {
-    #[command(subcommand)]
-    pub command: TaskSwitcherCommand,
-}
-
-#[derive(Debug, Serialize, Deserialize, clap::Subcommand)]
-pub enum TaskSwitcherCommand {
-    SelectNextTask {
-        #[clap(long)]
-        auto_confirm: bool,
-    },
-    SelectPreviousTask {
-        #[clap(long)]
-        auto_confirm: bool,
-    },
 }

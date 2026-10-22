@@ -28,3 +28,5 @@ One removal per commit, so each one can be reverted alone.
   `wallpaper_next/prev` commands stay for now (still wired to virtual desktops); settings types stay (data only).
 - Workspaces viewer: `src/ui/svelte/workspaces-viewer`, `src/static/widgets/workspaces-viewer` (incl. its shortcuts), theme style.
   `src/background/virtual_desktops` stays (dock and weg use it). Reason: overview panel not needed for the dock.
+- Task switcher (alt-tab replacement): `src/background/widgets/task_switcher`, `src/ui/svelte/task-switcher`,
+  `src/static/widgets/task-switcher` (incl. its shortcuts), theme style, `TaskSwitcher` slu-ipc CLI command. Reason: use Windows alt-tab.

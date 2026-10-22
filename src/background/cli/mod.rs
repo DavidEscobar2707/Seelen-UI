@@ -15,10 +15,7 @@ use crate::{
     error::Result,
     resources::cli as resources_cli,
     virtual_desktops::cli as vd_cli,
-    widgets::{
-        cli as widget_cli, popups::cli as popups_cli, show_settings,
-        task_switcher::cli as task_switcher_cli, weg::cli as weg_cli,
-    },
+    widgets::{cli as widget_cli, popups::cli as popups_cli, show_settings, weg::cli as weg_cli},
 };
 
 /// WARNING: seelen-ui.exe CLI commands are deprecated.
@@ -86,9 +83,6 @@ pub async fn process_app_command(cmd: AppCommand) -> Result<()> {
         }
         AppCommand::Popup(command) => {
             popups_cli::process(command)?;
-        }
-        AppCommand::TaskSwitcher(command) => {
-            task_switcher_cli::process(command)?;
         }
         AppCommand::ToggleShortcutsPause => {
             shortcuts::toggle_pause()?;
