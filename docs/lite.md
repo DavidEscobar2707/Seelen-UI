@@ -268,3 +268,21 @@ Restored from upstream by reverting the two removal commits (`4d312354` toolbar,
 - Dangling triggers are harmless: `@seelen/settings` opens the config folder, `@seelen/user-menu`, `@seelen/apps-menu` (only read as a settings key) do nothing.
 
 Stays removed: user-menu, apps-menu, flyouts (volume/brightness OSD), settings app, window manager, workspaces viewer, wallpaper manager, task switcher.
+
+## Phase 2 results (measured 2026-10-22, 60 s window, `scripts/lite/measure.ps1`)
+
+| Run | Processes | CPU % | Working set sum MB | Private MB |
+| --- | ---: | ---: | ---: | ---: |
+| Upstream, default widgets | 12 | 5.09 | 1470 | 1002 |
+| Upstream, configured dock only | 7 | 0.21 | 484 | 234 |
+| Seelen Lite phase 1 (dock) | 6 | 0.18 | 377 | 129 |
+| Seelen Lite phase 2 (dock + bar) | 6 | 0.20 | 434 | 173 |
+
+Bar side by side with the target: `docs/compare-phase2-bar.png`.
+
+Power (on battery, `scripts/lite/power.ps1`, BatteryStatus.DischargeRate sampled every 5 s for 120 s, alternating
+app on / app off): on 8518, 8912, 14265 mW; off 10609, 8648 mW. The spread inside one window (6-20 W) is larger than
+any on/off difference, because the desktop was not idle (other apps running). Result: no increase detectable with
+this method; a clean idle-power number needs a quiet desktop and longer windows.
+
+Not met: working-set sum 434 MB and private 173 MB are above 150 MB (WebView2 floor, see Phase 1 results).

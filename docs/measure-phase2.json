@@ -1,0 +1,64 @@
+﻿{
+    "summary":  {
+                    "Label":  "phase2",
+                    "When":  "2026-10-22T11:53:44",
+                    "WindowSec":  60,
+                    "Processes":  6,
+                    "WebViewProcesses":  5,
+                    "Sum_WorkingSet_MB":  433.7,
+                    "Sum_Private_MB":  173.1,
+                    "Sum_CPU_pct_of_machine":  0.197,
+                    "OnBattery":  true,
+                    "DischargeRate_mW":  11816
+                },
+    "rows":  [
+                 {
+                     "Name":  "seelen-ui.exe",
+                     "Pid":  40324,
+                     "Type":  "main",
+                     "WS_MB":  117.8,
+                     "Private_MB":  61.6,
+                     "CPU_pct":  0.192
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  48052,
+                     "Type":  "main",
+                     "WS_MB":  147.4,
+                     "Private_MB":  43.7,
+                     "CPU_pct":  0.003
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  30796,
+                     "Type":  "crashpad-handler",
+                     "WS_MB":  12.9,
+                     "Private_MB":  2.9,
+                     "CPU_pct":  0
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  42660,
+                     "Type":  "utility:network.mojom.NetworkService",
+                     "WS_MB":  38.8,
+                     "Private_MB":  10.3,
+                     "CPU_pct":  0
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  52996,
+                     "Type":  "utility:storage.mojom.StorageService",
+                     "WS_MB":  19.4,
+                     "Private_MB":  7.2,
+                     "CPU_pct":  0
+                 },
+                 {
+                     "Name":  "msedgewebview2.exe",
+                     "Pid":  25788,
+                     "Type":  "renderer",
+                     "WS_MB":  97.4,
+                     "Private_MB":  47.4,
+                     "CPU_pct":  0.002
+                 }
+             ]
+}
