@@ -1,7 +1,7 @@
 use std::{
     collections::HashSet,
     path::{Path, PathBuf},
-    sync::atomic::{AtomicBool, AtomicU32, Ordering},
+    sync::atomic::{AtomicBool, AtomicIsize, AtomicU32, Ordering},
 };
 
 use seelen_core::state::WegItemData;
@@ -28,6 +28,9 @@ static NATIVE_TASKBAR_HIDDEN: AtomicBool = AtomicBool::new(false);
 static ORIGINAL_STATE: AtomicU32 = AtomicU32::new(ABS_ALWAYSONTOP);
 /// The watchdog process is spawned once per app process; it outlives hide/restore cycles.
 static WATCHDOG_SPAWNED: AtomicBool = AtomicBool::new(false);
+
+/// Primary `Shell_TrayWnd` handle at the last hide, a different one means explorer restarted.
+static LAST_TRAY_HWND: AtomicIsize = AtomicIsize::new(0);
 
 const STATE_FILE: &str = "taskbar-state.txt";
 
@@ -121,11 +124,45 @@ pub fn get_taskbars_handles() -> Result<Vec<HWND>> {
     Ok(founds)
 }
 
+fn primary_tray_hwnd() -> isize {
+    get_taskbars_handles()
+        .ok()
+        .and_then(|h| h.first().map(|h| h.0 as isize))
+        .unwrap_or(0)
+}
+
+/// explorer.exe broadcasts `TaskbarCreated` to top-level windows when it (re)creates the
+/// taskbar: hide the new one and register our app bars again. Zero cost until it happens.
+fn init_explorer_restart_handler() {
+    use windows::{Win32::UI::WindowsAndMessaging::RegisterWindowMessageW, core::w};
+    let msg = unsafe { RegisterWindowMessageW(w!("TaskbarCreated")) };
+    if msg == 0 {
+        log::error!("Failed to register the TaskbarCreated message");
+        return;
+    }
+    crate::windows_api::event_window::subscribe_to_background_window(move |m, _, _| {
+        if m != msg || !NATIVE_TASKBAR_HIDDEN.load(Ordering::Acquire) {
+            return Ok(());
+        }
+        // our own tray refresh broadcasts the same message, only act on a new taskbar
+        let current = primary_tray_hwnd();
+        if current == 0 || current == LAST_TRAY_HWND.load(Ordering::Acquire) {
+            return Ok(());
+        }
+        log::info!("Taskbar re-created (explorer restart), hiding it again");
+        hide_native_taskbar();
+        crate::windows_api::reregister_all_bars();
+        Ok(())
+    });
+}
+
 pub fn hide_native_taskbar() {
+    LAST_TRAY_HWND.store(primary_tray_hwnd(), Ordering::Release);
     // the state is only read on the first hide, later calls (taskbar re-created / shown) would
     // read our own AutoHide
     if !NATIVE_TASKBAR_HIDDEN.swap(true, Ordering::AcqRel) {
         arm_watchdog();
+        init_explorer_restart_handler();
     }
     std::thread::spawn(|| match get_taskbars_handles() {
         Ok(handles) => {

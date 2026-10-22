@@ -10,8 +10,36 @@ use windows::Win32::{
 
 use crate::{error::Result, utils::lock_free::TracedMutex};
 
-static REGISTERED_BARS: LazyLock<TracedMutex<Vec<isize>>> =
+/// Bars registered on the shell, with the last data sent, so they can be registered again when
+/// explorer.exe restarts (the shell forgets every ABM_NEW registration).
+static REGISTERED_BARS: LazyLock<TracedMutex<Vec<(isize, RegisteredBar)>>> =
     LazyLock::new(|| TracedMutex::new(Vec::new()));
+
+#[derive(Debug, Clone, Copy)]
+struct RegisteredBar {
+    rect: RECT,
+    edge: u32,
+}
+
+/// Registers again every bar after the shell was restarted.
+pub fn reregister_all_bars() {
+    let guard = REGISTERED_BARS.lock();
+    for (addr, bar) in guard.iter() {
+        let mut data = APPBARDATA {
+            cbSize: std::mem::size_of::<APPBARDATA>() as u32,
+            hWnd: HWND(*addr as *mut _),
+            uEdge: bar.edge,
+            rc: bar.rect,
+            ..Default::default()
+        };
+        unsafe {
+            SHAppBarMessage(ABM_REMOVE, &mut data);
+            if SHAppBarMessage(ABM_NEW, &mut data) != 0 {
+                SHAppBarMessage(ABM_SETPOS, &mut data);
+            }
+        }
+    }
+}
 
 /// https://learn.microsoft.com/en-us/windows/win32/shell/abm-setstate#parameters
 #[derive(Debug, Clone, Copy)]
@@ -82,12 +110,18 @@ impl AppBarData {
         let addr = data.hWnd.0 as isize;
         let mut guard = REGISTERED_BARS.lock();
 
-        if !guard.contains(&addr) {
+        let bar = RegisteredBar {
+            rect: data.rc,
+            edge: data.uEdge,
+        };
+        if let Some(entry) = guard.iter_mut().find(|(a, _)| *a == addr) {
+            entry.1 = bar;
+        } else {
             let ok = unsafe { SHAppBarMessage(ABM_NEW, &mut data) };
             if ok == 0 {
                 return Err("Failed to register App Bar".into());
             }
-            guard.push(addr);
+            guard.push((addr, bar));
         }
 
         unsafe { SHAppBarMessage(ABM_SETPOS, &mut data) };
@@ -99,7 +133,7 @@ impl AppBarData {
         let addr = data.hWnd.0 as isize;
         let mut guard = REGISTERED_BARS.lock();
         unsafe { SHAppBarMessage(ABM_REMOVE, &mut data) };
-        guard.retain(|x| *x != addr);
+        guard.retain(|(x, _)| *x != addr);
         Ok(())
     }
 }
