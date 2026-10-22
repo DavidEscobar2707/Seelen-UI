@@ -12,7 +12,6 @@ import { RouteIcons, RoutePath } from "./routes.tsx";
 import cs from "./index.module.css";
 import { resourcesWithUpdate, themes, widgets } from "../../state/resources.ts";
 import { settings } from "../../state/mod.ts";
-import { session } from "../../state/session.ts";
 
 export const Navigation = memo(() => {
   const [collapsed, setCollapsed] = useState(false);
@@ -165,7 +164,7 @@ interface SessionAvatarProps {
 
 const SessionAvatar = ({ collapsed, isActive }: SessionAvatarProps) => {
   const { t } = useTranslation();
-  const currentSession = session.value;
+  const currentSession = null as { displayName?: string; username?: string; avatar?: string; email?: string } | null;
 
   const displayName = currentSession?.displayName || currentSession?.username;
   const avatarLetter = displayName?.[0]?.toUpperCase();

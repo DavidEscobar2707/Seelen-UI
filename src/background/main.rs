@@ -3,7 +3,6 @@
 #![feature(never_type)]
 
 mod app;
-mod backups;
 mod cli;
 mod error;
 mod exposed;
@@ -13,7 +12,6 @@ mod migrations;
 mod modules;
 mod resources;
 mod server;
-mod session;
 mod state;
 mod tauri_context;
 mod tauri_handlers;
@@ -33,7 +31,6 @@ use app::SeelenUI;
 use cli::{SelfPipe, ServicePipe, handle_console_client};
 use error::Result;
 use logger::SeelenLogger;
-use session::application::SessionManager;
 use slu_ipc::messages::SvcAction;
 use tauri_handlers::register_invoke_handler;
 use tauri_plugins::register_plugins;
@@ -130,12 +127,6 @@ async fn setup(app_handle: &tauri::AppHandle<tauri::Wry>) -> Result<()> {
         ServicePipe::start_service().await?;
     }
 
-    // Pre-warm SessionManager early so its PasswordVault decryption (~1s) overlaps
-    // with the integrity checks instead of running during the startup critical path.
-    std::thread::spawn(|| {
-        let _ = SessionManager::instance();
-    });
-
     if let Err(err) = utils::integrity::validate_webview_runtime() {
         match err {
             utils::integrity::IntegrityError::WebviewRuntimeNotInstalled => {
@@ -162,7 +153,6 @@ async fn setup(app_handle: &tauri::AppHandle<tauri::Wry>) -> Result<()> {
     SeelenUI::start().await?;
 
     warn_if_elevated(app_handle);
-    backups::infrastructure::start_backup_sync();
     Ok(())
 }
 

@@ -14,7 +14,6 @@ use crate::{
     migrations::Migrations,
     modules::{start::application::StartMenuManager, user::infrastructure::reemit_user},
     resources::RESOURCES,
-    session::infrastructure::reemit_session,
     state::application::{AppSettings, FULL_STATE, initialize_user_resources_watcher},
     utils::discord::{start_discord_rpc, update_discord_rpc},
     widgets::{
@@ -135,9 +134,8 @@ impl SeelenUI {
             SeelenWeg::restore_native_taskbar()?;
         }
 
-        // Re-emit user and session so streaming mode redaction takes effect immediately.
+        // Re-emit user so streaming mode redaction takes effect immediately.
         reemit_user();
-        reemit_session();
         Ok(())
     }
 

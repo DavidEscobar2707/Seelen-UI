@@ -572,19 +572,6 @@ slu_commands_declaration! {
         @fallible()
         trash_bin_empty(),
 
-    // Seelen Session
-    GetSeelenSession = get_seelen_session() -> Option<SeelenSession>,
-    SeelenLogin =
-        @fallible()
-        seelen_login(),
-    SeelenLogout =
-        @async()
-        @fallible()
-        seelen_logout(),
-
-    // Cloud Backup
-    GetBackupStatus = get_backup_status() -> BackupStatus,
-
 
     // Fonts
     GetFonts =

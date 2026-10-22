@@ -51,3 +51,7 @@ One removal per commit, so each one can be reverted alone.
   `check_for_updates` / `install_last_available_update` (+ bindings), `createUpdaterArtifacts` and the `plugins.updater` pubkey in
   `tauri.conf.json`, the settings header `UpdateButton`. `UpdaterSettings`/`UpdateChannel` types stay in `libs/core` (data only). `reqwest`
   now enables `json` explicitly (it was only on via the updater plugin).
+- Seelen account session + cloud backups: `src/background/session` (browser login, PasswordVault tokens, JWT refresh), `src/background/backups`,
+  commands `get_seelen_session` / `seelen_login` / `seelen_logout` / `get_backup_status`, events `session::changed` / `backup::status-changed`,
+  `SeelenSession` / `BackupStatus` types, session UI in the settings app. Premium-resource filtering in `resources/emitters.rs` is gone (no
+  account, so every resource on disk is listed). `backup_sync_enabled` stays in settings types (data only).
