@@ -116,6 +116,16 @@ pub fn convert_file_to_src(path: &Path) -> String {
     format!("{base}{encoded}")
 }
 
+pub fn collect_files(dir: &Path) -> Vec<PathBuf> {
+    walkdir::WalkDir::new(dir)
+        .follow_links(false)
+        .into_iter()
+        .filter_map(std::result::Result::ok)
+        .filter(|e| e.file_type().is_file())
+        .map(|entry| entry.into_path())
+        .collect()
+}
+
 pub fn date_based_hex_id() -> String {
     let since_epoch = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -159,14 +169,4 @@ macro_rules! measure {
         log::debug!("[measure] {}: {:.2?}", $name, elapsed);
         result
     }};
-}
-
-pub fn collect_files(dir: &Path) -> Vec<PathBuf> {
-    walkdir::WalkDir::new(dir)
-        .follow_links(false)
-        .into_iter()
-        .filter_map(std::result::Result::ok)
-        .filter(|e| e.file_type().is_file())
-        .map(|entry| entry.into_path())
-        .collect()
 }

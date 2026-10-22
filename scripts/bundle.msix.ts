@@ -68,10 +68,6 @@ if (pre || target === "release") {
 // dlls
 fs.copyFileSync(`${outDir}/sluhk.dll`, `${buildFolder}/sluhk.dll`);
 
-// integrity files
-fs.copyFileSync(`${outDir}/SHA256SUMS`, `${buildFolder}/SHA256SUMS`);
-fs.copyFileSync(`${outDir}/SHA256SUMS.sig`, `${buildFolder}/SHA256SUMS.sig`);
-
 // Add resources
 fs.cpSync("src/static", `${buildFolder}/static`, { recursive: true });
 

@@ -23,7 +23,6 @@ path = "service/main.rs"
 
 [build-dependencies]
 tauri-build = { workspace = true, features = [] }
-slu-utils = { workspace = true }
 
 [dependencies]
 slu-ipc = { workspace = true }

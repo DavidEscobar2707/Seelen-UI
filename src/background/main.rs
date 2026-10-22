@@ -139,14 +139,6 @@ async fn setup(app_handle: &tauri::AppHandle<tauri::Wry>) -> Result<()> {
         return Err(format!("Integrity check failed: {err:?}").into());
     }
 
-    if let Err(err) = crate::measure!(
-        "Integrity check",
-        utils::integrity::ensure_bundle_files_integrity(get_app_handle()).await
-    ) {
-        utils::integrity::show_bundle_integrity_dialog(get_app_handle());
-        return Err(err);
-    }
-
     SeelenUI::pre_start().await?;
     // before the widgets are created, so they can connect to the events websocket right away
     server::http::start_http_server();

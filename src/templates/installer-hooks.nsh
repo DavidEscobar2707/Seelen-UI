@@ -17,8 +17,6 @@
   RMDir /r "$INSTDIR\runtime"
 
   File /a "${__FILEDIR__}\..\..\sluhk.dll"
-  File /a "${__FILEDIR__}\..\..\SHA256SUMS"
-  File /a "${__FILEDIR__}\..\..\SHA256SUMS.sig"
 
   ; Include PDB file only for nightly builds
   ${StrLoc} $0 "${VERSION}" "nightly" ">"
@@ -49,8 +47,6 @@
 
 !macro NSIS_HOOK_POSTUNINSTALL
   Delete "$INSTDIR\sluhk.dll"
-  Delete "$INSTDIR\SHA256SUMS"
-  Delete "$INSTDIR\SHA256SUMS.sig"
   Delete "$INSTDIR\seelen_ui.pdb"
 
   ; Refresh file associations icons

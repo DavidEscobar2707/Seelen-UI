@@ -50,7 +50,6 @@ webp = "0.3"
 interprocess = "2.4.2"
 itertools = "0.15.0"
 notify-debouncer-full = "0.7.0"
-minisign = "0.9.1"
 os_info = "3.14.0"
 owo-colors = "4.2.3"
 parking_lot = "0.12.5"
@@ -64,7 +63,6 @@ regex = "1.12.3"
 reqwest = { version = "0.13.1", features = ["json"] }
 rust-i18n = "4.1.0"
 salvo = "0.95.1"
-sha2 = "0.10.9"
 seelen-core = { path = "libs/core" }
 slu-ipc = { path = "libs/slu-ipc" }
 slu-macros = { path = "libs/slu-macros" }

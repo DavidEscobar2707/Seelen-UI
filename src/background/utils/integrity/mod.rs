@@ -1,7 +1,5 @@
-mod checksums;
 mod webview;
 
-pub use checksums::*;
 pub use webview::*;
 
 use itertools::Itertools;

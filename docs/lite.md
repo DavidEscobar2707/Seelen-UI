@@ -57,3 +57,7 @@ One removal per commit, so each one can be reverted alone.
   account, so every resource on disk is listed). `backup_sync_enabled` stays in settings types (data only).
 - Discord rich presence: `src/background/utils/discord.rs`, `discord-rich-presence` dependency, its start/update calls in `app.rs`, the toggle in
   the settings app. `drpc` stays in settings types (data only).
+- Release signing + bundle integrity: `src/build.rs` no longer writes/signs `SHA256SUMS` (no `TAURI_SIGNING_PRIVATE_KEY*` env needed, release builds work
+  with no env vars); `utils/integrity/checksums.rs` (minisign signature check against upstream's key + bundle checksum check at startup) is gone, the
+  WebView2 runtime checks stay. Also removed `libs/utils` `checksums`/`signature` modules, `minisign`/`sha2` deps, and the SHA256SUMS lines in
+  `installer-hooks.nsh` and `scripts/bundle.msix.ts`.
