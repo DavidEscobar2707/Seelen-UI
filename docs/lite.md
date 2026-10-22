@@ -164,8 +164,8 @@ Notes: an `AppOrFile` without `umid` (or whose path is a `.lnk`) is dropped on l
 - Elevated service (`slu-service`): `src/service` (hotkeys, Task Scheduler task, elevated window helpers), `ServicePipe` + `start_service`, `libs/slu-ipc`
   `service.rs`/`SvcAction`, global shortcuts handling (`resolve_shortcuts` calls, `cli/shortcuts.rs`, `ToggleShortcutsPause` instance command), the
   `positioning` dependency of `src`, the `service.*` i18n strings. No UAC prompt at startup. The app now hides/restores `Shell_TrayWnd` itself
-  (`widgets/weg/native_taskbar.rs`); restore runs on exit, panic hook, `WM_ENDSESSION` and when the dock is disabled. A hard kill (taskkill /F, crash
-  without unwinding) leaves the taskbar hidden until explorer restarts or the app runs again with the dock disabled. Windows of elevated processes
+  (`widgets/weg/native_taskbar.rs`); restore runs on exit, panic hook, `WM_ENDSESSION` and when the dock is disabled. A hard kill is covered by the taskbar watchdog
+  (see "Robustness"). Windows of elevated processes
   can no longer be shown/moved/focused (calls just fail and log). Autostart is `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` value `SeelenLite`
   (`set_auto_start`/`get_auto_start_status`); the old `\Seelen\Seelen UI Service` task is never read or touched. NSIS/AppX templates and
   `scripts/bundle.msix.ts` still mention `slu-service.exe` (bundling is not used by the fork; fix before building an installer).
@@ -185,18 +185,18 @@ Notes: an `AppOrFile` without `umid` (or whose path is a `.lnk`) is dropped on l
 ## Perf
 
 Shared pause flag: `utils::idle::is_paused()` = session not interactive OR display off (`GUID_CONSOLE_DISPLAY_STATE` on the background window) OR a
-fullscreen app focused (foreground/rect events) OR `GAME_MODE_ACTIVE`. Periodic loops check it.
+fullscreen app focused (foreground/rect/minimize events, window frame == monitor rect) OR `GAME_MODE_ACTIVE`. Periodic loops check it.
 
 | Loop | Before | Now |
 | --- | --- | --- |
-| MouseEventHook (`GlobalMouseMove`) | 10 Hz always | 10 Hz only while a webview subscribed to the event (dock click-through hitbox) and not paused; otherwise blocked on a condvar woken by the hub's subscribe |
+| MouseEventHook (`GlobalMouseMove`) | 10 Hz always (then 10 Hz while subscribed) | No polling: a `WH_MOUSE_LL` hook (`mouse_hook.rs`) on its own thread, installed only while a webview subscribes (dock click-through hitbox), removed on unsubscribe. The callback only stores the position and arms a one-shot timer, the emit runs from the timer (<=10 events/s, nothing while the mouse is still, skipped while paused). Chosen over `WM_NCHITTEST` click-through because the frontends already consume cursor coordinates and the hook is ~100 lines with no webview changes |
 | Zombie window killer | 1 s | 10 s, skipped while paused |
 | Widget liveness ping | 5 s | 60 s, skipped while paused |
 | Memory pressure simulation | 30 s | 30 s, skipped while paused |
 | InteractableWindowsRevalidator | 5 s | 10 s, skipped while paused |
 | System info monitor (cpu/disks/net) | `polling_interval` (default 3, min 1) | min 2, skipped while paused |
 | Notification fallback thread | 1 s | 2 s, skipped while paused |
-| Keyboard layout / TIP / IME monitor (`system_settings/language`; starts when the bar asks for the layout) | 1 s, only skipped while the session was not interactive | 2 s, skipped while paused (no Windows notification covers other processes' per-thread layouts; Win+Space can take up to 2 s to show) |
+| Keyboard layout / TIP / IME monitor (`system_settings/language`; starts when the bar asks for the layout) | 1 s, only skipped while the session was not interactive | Checked immediately on foreground / IME win events; the 2 s poll remains only while a webview listens to the language/IME events (blocked on a condvar otherwise) and is skipped while paused. Not fully event-driven on purpose: Windows has no global notification for a layout switch inside the already focused window (`WM_INPUTLANGCHANGE` only reaches that window, `EVENT_OBJECT_IME_*` covers IME not plain layouts), so dropping the poll would miss Win+Space |
 | DDC/CI brightness poll (external monitors) | 5 s always once the brightness module existed | 5 s only within 30 s after a frontend read of the monitors or a brightness write (`BrightnessManager::touch_watch`), skipped while paused |
 | Waveform capture | ran when instantiated, 5 ms loop | drains at 2 s unless something subscribed to `media::waveform` and not paused (never instantiated by the dock) |
 
@@ -258,7 +258,7 @@ Restored from upstream by reverting the two removal commits (`4d312354` toolbar,
 - Default items (only applied if the toolbar `state.yml` in its widget data dir does not exist yet; an existing file keeps its own items, delete it to
   get the new defaults). Left: user (`@seelen/tb-user-menu`, new `tb_default_user.yml`, shows picture and name; click opens `ms-settings:yourinfo`),
   `|`, focused app, `-`, focused app title. Center: date/time (opens the calendar). Right: system tray, keyboard layout, bluetooth, media/volume,
-  network/wifi, battery (`@default/power`, opens `ms-settings:powersleep`), notifications, quick settings.
+  network/wifi, battery (`@default/power`, opens `ms-settings:powersleep`), focus assist (`@default/focus-assist`, `tb_default_focus_assist.yml`, the "z" icon, visible only while do not disturb is on; it reads the `Notifications` scope `dndActive`, i.e. the Windows notification mode event, so it is event-driven; the bell no longer draws the icon itself), notifications, quick settings.
 - Not in the default: `tb_cpu_usage`, `tb_memory_usage`, `tb_gpu_usage`, `tb_disk_usage`, `tb_network_usage` (installed, add them by hand to
   the toolbar state; the first one placed starts the system info monitor), `tb_workspaces_*` (virtual desktop switchers; still functional because
   `virtual_desktops` stays, kept), `@seelen/tb-power-menu` (available, not in the default).
@@ -286,3 +286,23 @@ any on/off difference, because the desktop was not idle (other apps running). Re
 this method; a clean idle-power number needs a quiet desktop and longer windows.
 
 Not met: working-set sum 434 MB and private 173 MB are above 150 MB (WebView2 floor, see Phase 1 results).
+
+## Robustness
+
+- **Taskbar watchdog.** `restore_native_taskbar` and the panic hook cannot run after `TerminateProcess` or a native crash, and hiding sets the
+  taskbar AppBar state to AUTOHIDE. Before the first hide the app reads the original state (`ABM_GETSTATE`), writes `<pid> <state>` to
+  `taskbar-state.txt` in the app data dir and spawns `slu taskbar-watchdog --pid <pid> --state <n> --file <path>` (hidden subcommand of the existing
+  `slu.exe` next to the app, `CREATE_NO_WINDOW`, tries `CREATE_BREAKAWAY_FROM_JOB`). The watchdog is a plain blocking `WaitForSingleObject(INFINITE)`
+  on the app process (no async runtime, no polling, no CPU). A clean exit deletes the state file first, so the watchdog finds nothing and exits.
+  If the file still names that pid the app died hard: it sets the saved state and shows `Shell_TrayWnd` + `Shell_SecondaryTrayWnd`, deletes the file and
+  exits. On start, a leftover file (watchdog also killed) is restored before hiding again. Every restore uses the saved state, never a hardcoded
+  AlwaysOnTop. `slu` keeps a console subsystem so its CLI output works; the watchdog never shows a window because of `CREATE_NO_WINDOW`.
+- **Explorer restart.** The background window handles the registered `TaskbarCreated` broadcast. If the primary `Shell_TrayWnd` handle differs from the
+  one hidden last (our own tray refresh broadcasts the same message, so same handle = ignore), the new taskbar is hidden again and every dock/bar
+  AppBar is re-registered (`ABM_REMOVE`, `ABM_NEW`, `ABM_SETPOS` with the last rect/edge, kept in `REGISTERED_BARS`), because the shell forgets them.
+- **Fullscreen detection** (`idle.rs`, `WindowsApi::is_fullscreen`). The foreground window counts as fullscreen when it has no caption/thick frame and
+  its outer rect covers `rcMonitor` of its monitor (1 px tolerance); desktop, `Shell_TrayWnd`/`Shell_SecondaryTrayWnd` and Seelen windows are ignored.
+  Rechecked on `EVENT_SYSTEM_FOREGROUND`, minimize start/end, move/size end and the debounced rect change of the focused window. Probable cause of the
+  missed test (not reproduced live): a *maximized* borderless window only fills the work area, which our own app bars shrink, so it never matched the
+  monitor rect; a window covering the whole monitor does. If the live retest still shows no log, check `WS_CAPTION`/`WS_THICKFRAME` on that window.
+  Unit tests cover the pure rect comparison.
