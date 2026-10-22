@@ -144,3 +144,9 @@ Notes: an `AppOrFile` without `umid` (or whose path is a `.lnk`) is dropped on l
   `scripts/translate/mod.ts`. The dock (`weg/state/settings.svelte.ts`) no longer reserves space for the bar (`workArea` = monitor rect); the revert of this
   commit puts the offset back. Kept: `fancy_toolbar` settings types + `ToolbarState`/`toolbar_items.rs` + `state_get/write_toolbar_items` commands
   (data only, lazy), so existing `settings.json` files still deserialize. `src/static/themes/bubbles` still lists a toolbar style (theme removed in step 10).
+- Toolbar popups (restored in phase 2): UI `src/ui/svelte/` + bundle `src/static/widgets/` for bluetooth-popup, calendar-popup, keyboard-selector, media-popup,
+  network-popup, notifications, power-menu, quick-settings, system-tray (each bundle also carried its `toolbar-plugin.yml` and opt-in `dock-plugin.yml`/dock
+  plugin js, so the optional dock plugins `@seelen/dock-*` are gone too), their 9 default-theme styles, translate-script lines. Backend modules untouched.
+  The dock itself opens none of them by default (the dock Media item drives playback directly), so none was kept. Left in place on purpose:
+  `src/ui/svelte/notifications/components/Notification.svelte` (imported by flyouts, deleted together with flyouts in the unwanted-widgets step).
+  Known dangling triggers until that step: apps-menu footer asks for `@seelen/power-menu` (logged "Widget not found").
