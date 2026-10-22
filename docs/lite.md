@@ -17,6 +17,74 @@ Debloat Seelen UI to a "minimum usable" Windows 11 shell. Delete and disable; do
 
 One removal per commit, so each one can be reverted alone.
 
+## Configuration
+
+There is no settings app. Everything that used to open it (dock menu entry, second launch of the exe, `slu settings`) opens the
+config folder in Explorer. Edit the files by hand while the app is closed (it rewrites them), then start it again.
+
+Config folder: `%APPDATA%\com.seelen.seelen-ui\`
+
+| File | Content |
+| --- | --- |
+| `settings.json` | global settings; dock settings live under `byWidget` -> `"@seelen/weg"` (`position`, `size`, `hideMode`, `mode`, `enabled`, ...) |
+| `data\seelen-weg\state.yml` | dock items: `left`, `center`, `right` lists (pinned apps, separators, plugin buttons) |
+| `themes\`, `plugins\`, `widgets\`, `iconpacks\` | user resources, loaded from disk |
+
+Both files are created on first run. If `state.yml` does not exist yet, the dock imports the pins of the Windows taskbar.
+Missing settings fall back to defaults, so `settings.json` only needs the keys you change:
+
+```json
+{
+  "byWidget": {
+    "@seelen/weg": { "position": "Bottom", "size": 40, "hideMode": "OnOverlap" }
+  }
+}
+```
+
+`position`: `Left | Right | Top | Bottom`. `hideMode`: `Never | Always | OnOverlap`. `mode`: `FullWidth | MinContent`.
+
+### Pinned dock apps by hand
+
+`data\seelen-weg\state.yml` (item `type` is one of `AppOrFile`, `Separator`, `Media`, `Plugin`; `AppOrFile` may omit `id`, the other
+types require an `id`; the nil uuid `00000000-0000-0000-0000-000000000000` is fine, a fresh one is generated on load):
+
+```yaml
+isReorderDisabled: false
+left:
+  - type: Plugin
+    id: 00000000-0000-0000-0000-000000000000
+    plugin: "@default/weg-start-menu"
+center:
+  - type: AppOrFile            # a classic exe: path is enough
+    displayName: File Explorer
+    path: C:\Windows\explorer.exe
+    pinned: true
+  - type: AppOrFile            # a Store/UWP app: umid (path is resolved from it)
+    displayName: Calculator
+    umid: Microsoft.WindowsCalculator_8wekyb3d8bbwe!App
+    path: ""
+    pinned: true
+  - type: AppOrFile            # custom launch command
+    displayName: Terminal
+    path: C:\Program Files\WindowsApps\Microsoft.WindowsTerminal\wt.exe
+    pinned: true
+    relaunch:
+      command: wt.exe
+      args: ["-d", "C:\\Projects"]
+      workingDir: C:\Projects
+  - type: Separator
+    id: 00000000-0000-0000-0000-000000000000
+right:
+  - type: Plugin
+    id: 00000000-0000-0000-0000-000000000000
+    plugin: "@default/weg-trash-bin"
+  - type: Media
+    id: 00000000-0000-0000-0000-000000000000
+```
+
+Notes: an `AppOrFile` without `umid` (or whose path is a `.lnk`) is dropped on load if the path does not exist. Fields: `displayName`,
+`umid`, `path`, `pinned`, `preventPinning`, `relaunch{command,args,workingDir,icon}` (see `WegItemData` in `libs/core/src/state/weg_items.rs`).
+
 ## Removed in phase 1
 
 - Window manager (tiling): `src/background/widgets/window_manager`, `src/ui/svelte/window-manager`,
@@ -61,3 +129,8 @@ One removal per commit, so each one can be reverted alone.
   with no env vars); `utils/integrity/checksums.rs` (minisign signature check against upstream's key + bundle checksum check at startup) is gone, the
   WebView2 runtime checks stay. Also removed `libs/utils` `checksums`/`signature` modules, `minisign`/`sha2` deps, and the SHA256SUMS lines in
   `installer-hooks.nsh` and `scripts/bundle.msix.ts`.
+- Settings app: `src/ui/react/settings`, `src/static/widgets/settings`. `show_settings` / `show_settings_at` became `open_config_folder` (Explorer on
+  `%APPDATA%\com.seelen.seelen-ui`). Triggering the `@seelen/settings` widget (dock menu, start menu footer, toolbar, quick settings) is intercepted
+  in `trigger_widget_inner` and opens the folder too, so those frontends need no change. `slu settings` and the second-launch path
+  (`is_already_running`) go through the same function. `set_widget_permissions` is now uncallable (it only accepted the settings app);
+  edit permissions in the data dir by hand. See "Configuration".

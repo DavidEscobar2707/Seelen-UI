@@ -32,7 +32,7 @@ pub struct AppCli {
 
 #[derive(Debug, Serialize, Deserialize, clap::Subcommand)]
 pub enum AppCommand {
-    /// Opens the Seelen settings gui.
+    /// Opens the Seelen config folder (the settings gui does not exist in the lite fork).
     Settings,
     VirtualDesk(VirtualDesktopCli),
     Debugger(DebuggerCli),

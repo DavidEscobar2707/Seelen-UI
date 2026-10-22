@@ -1,9 +1,0 @@
-:root {
-  /* config variables */
-  --config-border-radius: 8px;
-
-  /* z indexs */
-  --z-header: 1;
-  --z-docs-menu: 2;
-  --z-modal: 3;
-}

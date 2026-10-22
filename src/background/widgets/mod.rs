@@ -45,6 +45,11 @@ fn trigger_widget_inner(
     mut payload: WidgetTriggerPayload,
     owner_hwnd: Option<isize>,
 ) -> Result<()> {
+    // frontends still ask for the removed settings widget (dock menu, start menu, toolbar...)
+    if payload.id == seelen_core::resource::WidgetId::known_settings() {
+        return open_config_folder();
+    }
+
     let state = FULL_STATE.load();
     if !state.is_widget_enabled(&payload.id) {
         return Err("Can't trigger a disabled widget".into());
@@ -124,16 +129,15 @@ pub fn trigger_dialog_backend(dialog: Dialog) -> Result<()> {
     trigger_widget_inner(payload, None)
 }
 
-pub fn show_settings() -> Result<()> {
-    crate::tauri_handlers::Handlers::trigger_widget(WidgetTriggerPayload::new(
-        "@seelen/settings".into(),
-    ))
-}
-
-pub fn show_settings_at(route: &str) -> Result<()> {
-    let mut payload = WidgetTriggerPayload::new("@seelen/settings".into());
-    payload.add_custom_arg("route", route);
-    crate::tauri_handlers::Handlers::trigger_widget(payload)
+/// The settings app was removed in the lite fork: everything that used to open it opens the
+/// config folder (settings.json, weg items, etc.) in Explorer instead.
+pub fn open_config_folder() -> Result<()> {
+    let dir = SEELEN_COMMON.app_data_dir();
+    std::fs::create_dir_all(dir)?;
+    std::process::Command::new(SEELEN_COMMON.system_dir().join("explorer.exe"))
+        .arg(dir)
+        .spawn()?;
+    Ok(())
 }
 
 fn widget_data_dir(webview: &tauri::WebviewWindow) -> Result<PathBuf> {
