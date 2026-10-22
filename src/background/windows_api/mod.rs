@@ -116,8 +116,8 @@ use windows::{
                 SW_SHOWNORMAL, SWP_ASYNCWINDOWPOS, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
                 SWP_NOZORDER, SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS, SendMessageW,
                 SendNotifyMessageW, SetWindowPos, ShowWindow, ShowWindowAsync,
-                SystemParametersInfoW, WINDOW_EX_STYLE, WINDOW_STYLE, WM_SETTINGCHANGE, WS_SIZEBOX,
-                WS_THICKFRAME,
+                SystemParametersInfoW, WINDOW_EX_STYLE, WINDOW_STYLE, WM_SETTINGCHANGE, WS_CAPTION,
+                WS_SIZEBOX, WS_THICKFRAME,
             },
         },
     },
@@ -264,21 +264,20 @@ impl WindowsApi {
         unsafe { IsZoomed(hwnd) }.into()
     }
 
+    /// A window is fullscreen when it has no caption/border and its frame covers the whole
+    /// monitor rect (not the work area, which shrinks with our own app bars).
     pub fn is_fullscreen(hwnd: HWND) -> Result<bool> {
         let styles = WindowsApi::get_styles(hwnd);
-        if styles.contains(WS_THICKFRAME) {
+        if styles.contains(WS_CAPTION) || styles.contains(WS_THICKFRAME) {
             return Ok(false);
         }
 
         let rc_monitor = WindowsApi::monitor_rect(WindowsApi::monitor_from_window(hwnd))?;
-        let window_rect = WindowsApi::get_inner_window_rect(hwnd)?;
-        // Allow 1px tolerance: Electron/Chromium apps adjust their rect by 1px on focus loss
-        // (borderless-maximized mode), which would otherwise break fullscreen detection.
-        const TOLERANCE: i32 = 1;
-        Ok(window_rect.left <= rc_monitor.left + TOLERANCE
-            && window_rect.top <= rc_monitor.top + TOLERANCE
-            && window_rect.right >= rc_monitor.right - TOLERANCE
-            && window_rect.bottom >= rc_monitor.bottom - TOLERANCE)
+        let window_rect = match WindowsApi::get_outer_window_rect(hwnd) {
+            Ok(rect) => rect,
+            Err(_) => WindowsApi::get_inner_window_rect(hwnd)?,
+        };
+        Ok(rect_covers_monitor(&window_rect, &rc_monitor))
     }
 
     /// Whether the window carries a (non-null) prop with this name.
@@ -1276,5 +1275,51 @@ impl WindowsApi {
 
         unsafe { ShellExecuteExW(&mut info)? };
         Ok(())
+    }
+}
+
+/// Whether `window` covers the full `monitor` rect. 1px tolerance: Electron/Chromium apps adjust
+/// their rect by 1px on focus loss (borderless-maximized mode).
+pub fn rect_covers_monitor(window: &RECT, monitor: &RECT) -> bool {
+    const TOLERANCE: i32 = 1;
+    window.left <= monitor.left + TOLERANCE
+        && window.top <= monitor.top + TOLERANCE
+        && window.right >= monitor.right - TOLERANCE
+        && window.bottom >= monitor.bottom - TOLERANCE
+}
+
+#[cfg(test)]
+mod fullscreen_tests {
+    use super::*;
+
+    fn r(left: i32, top: i32, right: i32, bottom: i32) -> RECT {
+        RECT {
+            left,
+            top,
+            right,
+            bottom,
+        }
+    }
+
+    #[test]
+    fn covers_monitor_rect() {
+        let monitor = r(0, 0, 1920, 1080);
+        assert!(rect_covers_monitor(&r(0, 0, 1920, 1080), &monitor));
+        assert!(rect_covers_monitor(&r(-8, -8, 1928, 1088), &monitor));
+        assert!(rect_covers_monitor(&r(1, 1, 1919, 1079), &monitor));
+    }
+
+    #[test]
+    fn work_area_is_not_fullscreen() {
+        let monitor = r(0, 0, 1920, 1080);
+        assert!(!rect_covers_monitor(&r(0, 40, 1920, 1030), &monitor));
+        assert!(!rect_covers_monitor(&r(0, 0, 1000, 1080), &monitor));
+    }
+
+    #[test]
+    fn secondary_monitor_offset() {
+        let monitor = r(1920, 0, 3840, 1080);
+        assert!(rect_covers_monitor(&r(1920, 0, 3840, 1080), &monitor));
+        assert!(!rect_covers_monitor(&r(0, 0, 1920, 1080), &monitor));
     }
 }

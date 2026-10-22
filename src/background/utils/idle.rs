@@ -36,11 +36,17 @@ pub fn set_display_off(off: bool) {
 
 /// Starts tracking the fullscreen state, call once after the win hook is registered.
 pub fn init() {
-    HookManager::subscribe(|(event, _origin)| {
-        if matches!(
-            event,
-            WinEvent::SystemForeground | WinEvent::SynDebouncedRectChange
-        ) {
+    HookManager::subscribe(|(event, origin)| {
+        let recheck = match event {
+            WinEvent::SystemForeground
+            | WinEvent::SystemMinimizeStart
+            | WinEvent::SystemMinimizeEnd
+            | WinEvent::SystemMoveSizeEnd => true,
+            // location changes of background windows do not matter
+            WinEvent::SynDebouncedRectChange => origin.is_focused(),
+            _ => false,
+        };
+        if recheck {
             let fullscreen = Window::get_foregrounded().is_fullscreen();
             if FULLSCREEN_FOCUSED.swap(fullscreen, Ordering::AcqRel) != fullscreen {
                 log::info!("Fullscreen app focused: {fullscreen}");

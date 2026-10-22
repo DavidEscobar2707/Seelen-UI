@@ -288,6 +288,10 @@ impl Window {
     pub fn is_fullscreen(&self) -> bool {
         WindowsApi::is_fullscreen(self.0).unwrap_or(false)
             && !self.is_desktop()
+            && !matches!(
+                self.class().as_str(),
+                "Shell_TrayWnd" | "Shell_SecondaryTrayWnd"
+            )
             && !self.process().is_seelen() // we ignore seelen widgets
     }
 
