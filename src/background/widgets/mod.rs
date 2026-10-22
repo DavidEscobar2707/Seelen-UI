@@ -20,7 +20,9 @@ use seelen_core::{
     },
     system_state::{AppBarEdge, ZOrder},
 };
-use tauri::{Emitter, Manager};
+use tauri::Emitter;
+#[cfg(debug_assertions)]
+use tauri::Manager;
 use windows::Win32::Foundation::{HWND, RECT};
 
 use crate::{
@@ -334,10 +336,15 @@ impl crate::tauri_handlers::Handlers {
     }
 
     pub fn debug_open_dev_tools(label: String) -> Result<()> {
-        let window = get_app_handle()
-            .get_webview_window(&label)
-            .ok_or("Widget window not found")?;
-        window.open_devtools();
+        #[cfg(debug_assertions)]
+        {
+            let window = get_app_handle()
+                .get_webview_window(&label)
+                .ok_or("Widget window not found")?;
+            window.open_devtools();
+        }
+        #[cfg(not(debug_assertions))]
+        log::warn!("Devtools are only available in debug builds ({label})");
         Ok(())
     }
 

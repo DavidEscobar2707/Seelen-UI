@@ -364,8 +364,7 @@ impl WebviewArgs {
     ];
 
     const UNSTABLE_OPTIMIZATIONS: &[&str] = &[
-        // this reduces ram usage but if a widget crashes it will crash
-        // all widgets with the same loader, so it's not worth it
+        // same-origin surfaces share one renderer (less RAM, a crash takes all of them down)
         "--process-per-site",
     ];
 

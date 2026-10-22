@@ -254,6 +254,7 @@ impl WidgetPod {
             }
         });
 
+        #[cfg(debug_assertions)]
         if definition.debug {
             window.0.open_devtools();
         }

@@ -518,9 +518,9 @@ pub struct Settings {
     pub wallpaper_collections: Vec<WallpaperCollection>,
     /// Performance options
     pub performance_mode: PerformanceModeSettings,
-    /// enable or disable hardware acceleration
+    /// enable or disable hardware acceleration (default off: software rendering removes the GPU process)
     pub hardware_acceleration: bool,
-    /// Enable unstable chromium optimizations (e.g. process-per-site). May improve RAM usage but can cause crashes.
+    /// Enable chromium optimizations (process-per-site: same-origin surfaces share one renderer). On by default in Seelen Lite.
     pub unstable_optimizations: bool,
     /// interval to poll for system resources like cpu, memory, network usage, etc, in seconds.
     pub polling_interval: u64,
@@ -555,8 +555,8 @@ impl Default for Settings {
             by_theme: HashMap::new(),
             by_wallpaper: HashMap::new(),
             wallpaper_collections: Vec::new(),
-            hardware_acceleration: true,
-            unstable_optimizations: false,
+            hardware_acceleration: false,
+            unstable_optimizations: true,
             polling_interval: 3,
             streaming_mode: false,
             backup_sync_enabled: true,

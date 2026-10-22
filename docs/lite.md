@@ -206,3 +206,9 @@ lazy), websocket ping (30 s), power resume refresh, debouncers (100-1000 ms, eve
 CSS: `weg-item-attention-indicator-flashing` now runs 6 iterations instead of `infinite`; the blur filter of the media-session thumbnail
 (`MediaSession.svelte`) and the `backdrop-filter` of the shared Wallpaper error toast are gone. No `infinite` animation or blur/backdrop-filter remains in
 `src/static`, `src/ui`, `libs/ui` styles (the scroll-timeline shadows in `weg.scss` are driven by scroll, not time).
+
+Webview args/defaults: `hardware_acceleration` now defaults to `false` (software path, `--in-process-gpu --disable-gpu`: no GPU process) and
+`unstable_optimizations` (= `--process-per-site`) defaults to `true`. These are `serde` defaults: an existing `settings.json` that already stores the
+old values keeps them, edit it by hand to switch. Tauri `devtools` feature removed; `open_devtools` calls are `cfg(debug_assertions)` only (release
+logs a warning for `debug_open_dev_tools`). Release profile: `debug = false` (was `limited`); `lto = true`, `codegen-units = 1`, `strip = true`,
+`panic` stays unwind (the panic hook restores the taskbar).
