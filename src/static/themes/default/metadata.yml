@@ -9,10 +9,7 @@ styles:
   # For third-party widgets uses the real widget id, friendly ids are only for bundle or local themes,
   # as friendly ids are not stable.
   "@seelen/weg": !include styles/weg.scss
-  "@seelen/apps-menu": !include styles/apps-menu.scss
-  "@seelen/user-menu": !include styles/user-menu.scss
   "@seelen/context-menu": !include styles/context-menu.scss
-  "@seelen/flyouts": !include styles/flyouts.css
   "@seelen/tooltip": !include styles/tooltip.scss
 
 # shared styles across all widgets

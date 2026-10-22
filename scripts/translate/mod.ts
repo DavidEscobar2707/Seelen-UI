@@ -43,11 +43,6 @@ async function completeTranslationsFor(localesDir: string) {
   writeFileSync(`${localesDir}/hash.yml`, yaml.dump(Object.fromEntries(hashTable)));
 }
 
-await completeTranslationsFor("src/ui/react/settings/i18n/translations");
-
 await completeTranslationsFor("src/ui/svelte/weg/i18n/translations");
-await completeTranslationsFor("src/ui/svelte/apps-menu/i18n/translations");
-await completeTranslationsFor("src/ui/svelte/user-menu/i18n/translations");
-await completeTranslationsFor("src/ui/svelte/flyouts/i18n/translations");
 
 await completeTranslationsFor("src/background/i18n");

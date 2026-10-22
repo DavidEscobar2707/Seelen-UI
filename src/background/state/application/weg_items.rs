@@ -149,16 +149,10 @@ impl WegItemsManager {
 fn initial_items() -> WegItems {
     WegItems {
         is_reorder_disabled: false,
-        left: vec![
-            WegItem::Plugin {
-                id: Uuid::new_v4(),
-                plugin: "@default/weg-start-menu".into(),
-            },
-            WegItem::Plugin {
-                id: Uuid::new_v4(),
-                plugin: "@default/weg-show-desktop".into(),
-            },
-        ],
+        left: vec![WegItem::Plugin {
+            id: Uuid::new_v4(),
+            plugin: "@default/weg-start-menu".into(),
+        }],
         center: vec![WegItem::AppOrFile(WegItemData {
             id: Uuid::new_v4(),
             umid: None,
@@ -211,17 +205,12 @@ mod tests {
     fn test_initial_items_structure() {
         let items = initial_items();
 
-        assert_eq!(
-            items.left.len(),
-            2,
-            "Left should have StartMenu and ShowDesktop"
-        );
+        assert_eq!(items.left.len(), 1, "Left should have StartMenu");
         assert_eq!(items.center.len(), 1, "Center should have File Explorer");
         assert_eq!(items.right.len(), 2, "Right should have TrashBin and Media");
 
         // Verify left items
         assert!(matches!(items.left[0], WegItem::Plugin { .. }));
-        assert!(matches!(items.left[1], WegItem::Plugin { .. }));
 
         // Verify center has explorer
         if let WegItem::AppOrFile(ref data) = items.center[0] {

@@ -293,11 +293,6 @@ impl crate::tauri_handlers::Handlers {
     }
 
     pub fn show_start_menu() -> Result<()> {
-        let guard = FULL_STATE.load();
-        if guard.is_widget_enabled(&"@seelen/apps-menu".into()) {
-            Self::trigger_widget(WidgetTriggerPayload::new("@seelen/apps-menu".into()))?;
-            return Ok(());
-        }
         // trick for showing the native start menu
         Keyboard::new().send_keys("{win}")
     }

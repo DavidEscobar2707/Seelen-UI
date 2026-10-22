@@ -150,3 +150,7 @@ Notes: an `AppOrFile` without `umid` (or whose path is a `.lnk`) is dropped on l
   The dock itself opens none of them by default (the dock Media item drives playback directly), so none was kept. Left in place on purpose:
   `src/ui/svelte/notifications/components/Notification.svelte` (imported by flyouts, deleted together with flyouts in the unwanted-widgets step).
   Known dangling triggers until that step: apps-menu footer asks for `@seelen/power-menu` (logged "Widget not found").
+- Unwanted widgets/plugins: `apps-menu` (UI + bundle + theme style; the dock start button now always sends the Win key, `show_start_menu` no longer
+  looks for the widget), `flyouts` (volume/brightness OSD), `user-menu` (`user` bundle), plugins `weg_default_power` and `weg_show_desktop`, theme
+  `src/static/themes/bubbles`, leftover `Notification.svelte`, translate-script lines. The dock default items drop the show-desktop button; an existing
+  `state.yml` that still lists a removed plugin just renders nothing for that slot. `get_start_menu_items`/`get_native_start_menu` commands stay (backend).
