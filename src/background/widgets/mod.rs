@@ -2,7 +2,6 @@ pub mod cli;
 pub mod loader;
 pub mod manager;
 pub mod permissions;
-pub mod toolbar;
 pub mod webview;
 pub mod weg;
 

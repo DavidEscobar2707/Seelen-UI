@@ -139,3 +139,8 @@ Notes: an `AppOrFile` without `umid` (or whose path is a `.lnk`) is dropped on l
   served the settings app; the service-side registration and `slu popup` IPC variants stay, unused). A corrupted `settings.json` now shows a native
   `tauri_plugin_dialog` message box. No React app remains, so `scripts/build/builders/react.ts` and the react entry discovery are gone
   (`libs/ui/react` components and the preact/react npm deps stay until the unused-deps step).
+- Toolbar (top bar) (restored in phase 2): `src/ui/svelte/fancy-toolbar`, `src/static/widgets/toolbar`, `src/background/widgets/toolbar` (stub: height helper + a
+  commented hook), all 11 `tb_*` plugins in `src/static/plugins`, the theme style `default/styles/fancy-toolbar.scss`, its i18n completion line in
+  `scripts/translate/mod.ts`. The dock (`weg/state/settings.svelte.ts`) no longer reserves space for the bar (`workArea` = monitor rect); the revert of this
+  commit puts the offset back. Kept: `fancy_toolbar` settings types + `ToolbarState`/`toolbar_items.rs` + `state_get/write_toolbar_items` commands
+  (data only, lazy), so existing `settings.json` files still deserialize. `src/static/themes/bubbles` still lists a toolbar style (theme removed in step 10).

@@ -46,7 +46,6 @@ async function completeTranslationsFor(localesDir: string) {
 await completeTranslationsFor("src/ui/react/settings/i18n/translations");
 
 await completeTranslationsFor("src/ui/svelte/weg/i18n/translations");
-await completeTranslationsFor("src/ui/svelte/fancy-toolbar/i18n/translations");
 await completeTranslationsFor("src/ui/svelte/power-menu/i18n/translations");
 await completeTranslationsFor("src/ui/svelte/bluetooth-popup/i18n/translations");
 await completeTranslationsFor("src/ui/svelte/network-popup/i18n/translations");
