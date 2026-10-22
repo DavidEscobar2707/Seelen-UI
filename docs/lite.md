@@ -19,4 +19,6 @@ One removal per commit, so each one can be reverted alone.
 
 ## Removed in phase 1
 
-(filled in per commit)
+- Window manager (tiling): `src/background/widgets/window_manager`, `src/ui/svelte/window-manager`,
+  `src/static/widgets/window-manager`, all `wm_*` plugins, wm CLI subcommand, wm commands/events, wm theme
+  style. Twm/wm settings types in `libs/core` stay (data only). Reason: not used; dock does not need it.

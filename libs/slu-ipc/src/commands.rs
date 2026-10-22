@@ -36,7 +36,6 @@ pub enum AppCommand {
     Settings,
     VirtualDesk(VirtualDesktopCli),
     Debugger(DebuggerCli),
-    WindowManager(WindowManagerCli),
     Popup(PopupsCli),
     Weg(WegCli),
     Widget(WidgetCli),
@@ -283,100 +282,12 @@ pub enum WegCommand {
     },
 }
 
-// ===== WindowManager =====
-
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, clap::ValueEnum)]
-pub enum AllowedReservations {
-    Left,
-    Right,
-    Top,
-    Bottom,
-    Stack,
-    Float,
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, clap::ValueEnum)]
 pub enum Direction {
     Left,
     Right,
     Up,
     Down,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, clap::ValueEnum)]
-pub enum Sizing {
-    Increase,
-    Decrease,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, clap::ValueEnum)]
-pub enum StepWay {
-    Next,
-    Prev,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, clap::ValueEnum)]
-pub enum Axis {
-    Horizontal,
-    Vertical,
-    Top,
-    Bottom,
-    Left,
-    Right,
-}
-
-/// Manage the Seelen Window Manager.
-#[derive(Debug, Serialize, Deserialize, clap::Args)]
-#[command(alias = "wm")]
-pub struct WindowManagerCli {
-    #[command(subcommand)]
-    pub subcommand: WmCommand,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, clap::Subcommand)]
-pub enum WmCommand {
-    /// Toggles the Seelen Window Manager.
-    Toggle,
-    /// Reserve space for a incoming window.
-    Reserve {
-        /// The position of the new window.
-        side: AllowedReservations,
-    },
-    /// Cancels the current reservation
-    CancelReservation,
-    /// Increases or decreases the size of the window
-    Width {
-        /// What to do with the width.
-        action: Sizing,
-    },
-    /// Increases or decreases the size of the window
-    Height {
-        /// What to do with the height.
-        action: Sizing,
-    },
-    /// Resets the size of the containers in current workspace to the default size.
-    ResetWorkspaceSize,
-    /// Toggles the floating state of the window
-    ToggleFloat,
-    /// Toggles workspace layout mode to monocle (single stack)
-    ToggleMonocle,
-    /// Cycles the foregrounf node if it is a stack
-    CycleStack { way: StepWay },
-    /// Focuses the window in the specified position.
-    Focus {
-        /// The position of the window to focus.
-        side: Direction,
-    },
-    /// Moves the window to the specified position
-    Move {
-        /// Direction to move
-        side: Direction,
-    },
-    /// Moves the window to another monitor in the specified side
-    MoveToMonitor {
-        /// Direction to move
-        side: Direction,
-    },
 }
 
 // ===== TaskSwitcher =====

@@ -5,7 +5,6 @@ metadata:
   tags:
     - weg
     - toolbar
-    - window-manager
 styles:
   # For devs: key is the id of the target widget and value is the relative path to the style.
   # For third-party widgets uses the real widget id, friendly ids are only for bundle or local themes,
@@ -15,7 +14,6 @@ styles:
   "@seelen/task-switcher": !include styles/task-switcher.scss
   "@seelen/wallpaper-manager": !include styles/wallpaper-manager.css
   "@seelen/weg": !include styles/weg.scss
-  "@seelen/window-manager": !include styles/window-manager.css
   "@seelen/system-tray": !include styles/tray-menu.scss
   "@seelen/quick-settings": !include styles/quick-settings.scss
   "@seelen/bluetooth-popup": !include styles/bluetooth-popup.scss

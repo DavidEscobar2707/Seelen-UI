@@ -486,20 +486,10 @@ slu_commands_declaration! {
         @fallible()
         weg_import_pinned_taskbar_items() -> usize,
 
-    // Windows Manager
-    WmGetRenderTree = wm_get_render_tree() -> TwmGlobalRuntimeTree,
-    SetAppWindowsPositions =
-        @webview()
-        @fallible()
-        set_app_windows_positions(positions: std::collections::HashMap<isize, Rect>),
     RequestFocus =
         @webview()
         @fallible()
         request_focus(hwnd: isize),
-    WmSetStackActiveWindow =
-        @webview()
-        @fallible()
-        wm_set_stack_active_window(hwnd: isize),
 
     // Network
     WlanScan = wlan_scan(),

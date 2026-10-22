@@ -8,7 +8,6 @@ pub mod toolbar;
 pub mod wallpaper_manager;
 pub mod webview;
 pub mod weg;
-pub mod window_manager;
 
 use std::{
     path::{Path, PathBuf},
@@ -249,6 +248,20 @@ impl crate::tauri_handlers::Handlers {
         payload.add_custom_arg("owner", serde_json::to_value(&owner.raw)?);
 
         trigger_widget_inner(payload, Some(owner_hwnd))
+    }
+
+    /// TODO delete this is used only by webview, but this should use self_focus command.
+    pub fn request_focus(webview: tauri::WebviewWindow, hwnd: isize) -> Result<()> {
+        permissions::request_widget_permission(
+            &webview,
+            permissions::WidgetPerm::ManageAppWindows,
+        )?;
+        let window = crate::windows_api::window::Window::from(hwnd);
+        if !window.is_window() {
+            return Ok(());
+        }
+        window.focus()?;
+        Ok(())
     }
 
     pub fn get_self_window_handle(webview: tauri::WebviewWindow) -> Result<isize> {

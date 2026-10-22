@@ -99,10 +99,6 @@ slu_events_declaration! {
     DarkModeChanged(bool) as "dark-mode-changed",
     SystemFontsChanged(Vec<SeelenFont>) as "system::fonts-changed",
 
-    WMSetReservation(Option<twm::TwmReservation>) as "wm::set-reservation",
-    WMForceRetiling as "wm::force-retiling",
-    WMTreeChanged(TwmGlobalRuntimeTree) as "wm::tree-changed",
-
     StateSettingsChanged(Settings) as "settings-changed",
     StateThemesChanged(Vec<Theme>) as "themes",
     StateIconPacksChanged(Vec<IconPack>) as "icon-packs",

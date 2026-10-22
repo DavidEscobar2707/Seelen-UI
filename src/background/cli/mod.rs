@@ -18,7 +18,7 @@ use crate::{
     widgets::{
         cli as widget_cli, popups::cli as popups_cli, show_settings,
         task_switcher::cli as task_switcher_cli, wallpaper_manager::cli as wallpaper_cli,
-        weg::cli as weg_cli, window_manager::cli as wm_cli,
+        weg::cli as weg_cli,
     },
 };
 
@@ -75,9 +75,6 @@ pub async fn process_app_command(cmd: AppCommand) -> Result<()> {
         }
         AppCommand::Debugger(command) => {
             debugger::process(command)?;
-        }
-        AppCommand::WindowManager(command) => {
-            wm_cli::process(command)?;
         }
         AppCommand::Weg(command) => {
             weg_cli::process(command)?;

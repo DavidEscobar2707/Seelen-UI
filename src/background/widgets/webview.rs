@@ -84,9 +84,7 @@ impl WidgetWebview {
                 builder = builder.always_on_bottom(true);
             }
             WidgetPreset::Overlay | WidgetPreset::Popup => {
-                // the window manager overlay is not topmost, its z-order is handled by the wm hook
-                let always_on_top = widget.id != WidgetId::known_wm();
-                builder = builder.always_on_top(always_on_top).resizable(false);
+                builder = builder.always_on_top(true).resizable(false);
             }
             _ => {}
         }

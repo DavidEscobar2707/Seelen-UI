@@ -10,9 +10,7 @@ use crate::{
     error::{Result, ResultLogExt},
     resources::ResourceManager,
     utils::constants::SEELEN_COMMON,
-    widgets::{
-        manager::WIDGET_MANAGER, trigger_dialog_backend, window_manager::state_v2::WM_STATE,
-    },
+    widgets::{manager::WIDGET_MANAGER, trigger_dialog_backend},
 };
 
 use super::AppSettings;
@@ -22,7 +20,6 @@ impl AppSettings {
         emit_to_webviews(SeelenEvent::StateSettingsChanged, &self.settings);
         SeelenUI::on_settings_change(self)?;
         WIDGET_MANAGER.reconcile().log_error();
-        WM_STATE.lock().on_settings_changed();
         Ok(())
     }
 
