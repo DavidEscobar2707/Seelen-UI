@@ -202,3 +202,7 @@ Judged and left (only run during an active operation or are retries/debounces): 
 (only while a window flashes), tray registry lookup retry (200 ms, per icon), monitor/virtual desktop retry sleeps, wifi connect wait, bluetooth
 pairing, media players removal/thumbnail retries, TracedMutex cycle check (only while a lock is contended), DDC/CI poll (5 s, brightness module is
 lazy), websocket ping (30 s), power resume refresh, debouncers (100-1000 ms, event-triggered), wallpaper rotation (>= 60 s).
+
+CSS: `weg-item-attention-indicator-flashing` now runs 6 iterations instead of `infinite`; the blur filter of the media-session thumbnail
+(`MediaSession.svelte`) and the `backdrop-filter` of the shared Wallpaper error toast are gone. No `infinite` animation or blur/backdrop-filter remains in
+`src/static`, `src/ui`, `libs/ui` styles (the scroll-timeline shadows in `weg.scss` are driven by scroll, not time).

@@ -98,7 +98,6 @@
     font-size: 0.875rem;
     font-weight: 500;
     border-radius: 10px;
-    backdrop-filter: blur(10px);
     z-index: 1000;
   }
 </style>

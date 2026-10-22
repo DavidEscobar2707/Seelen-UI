@@ -137,7 +137,7 @@
       width: 100%;
       height: 100%;
       object-fit: fill;
-      filter: blur(10px) brightness(125%) contrast(125%);
+      filter: brightness(125%) contrast(125%);
     }
   }
 

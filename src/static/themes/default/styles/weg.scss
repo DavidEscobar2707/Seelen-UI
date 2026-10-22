@@ -302,7 +302,7 @@
     background-color: var(--weg-item-attention-color);
 
     &.weg-item-attention-indicator-flashing {
-      animation: weg-item-flashing 0.5s ease-in-out infinite alternate;
+      animation: weg-item-flashing 0.5s ease-in-out 6 alternate;
     }
   }
 
