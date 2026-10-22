@@ -1,0 +1,17 @@
+id: "@seelen/tb-user-menu"
+metadata:
+  displayName:
+    en: User
+    es: Usuario
+  description:
+    en: Shows the Windows user name and picture. Click opens the Windows account settings.
+icon: FaRegCircleUser
+target: "@seelen/fancy-toolbar"
+plugin:
+  scopes:
+    - User
+  tooltip: |-
+    return user.displayName;
+  template: |-
+    return [Image({ path: user.profilePicturePath }), ' ', user.displayName];
+  onClickV2: open("ms-settings:yourinfo")

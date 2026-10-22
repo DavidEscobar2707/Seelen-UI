@@ -61,6 +61,8 @@ impl ToolbarItemsManager {
     }
 }
 
+/// Default bar (docs/target.png). The `tb_*` usage plugins (cpu, memory, gpu, disk, network usage) and
+/// the workspace switchers stay installed but are not listed here: nothing polls their data until the user adds one.
 fn initial_items() -> ToolbarState {
     ToolbarState {
         left: vec![
@@ -82,8 +84,8 @@ fn initial_items() -> ToolbarState {
             ToolbarItem2::Plugin("@seelen/tb-system-tray".into()),
             ToolbarItem2::Plugin("@seelen/tb-keyboard-selector".into()),
             ToolbarItem2::Plugin("@seelen/tb-bluetooth-popup".into()),
-            ToolbarItem2::Plugin("@seelen/tb-network-popup".into()),
             ToolbarItem2::Plugin("@seelen/tb-media-popup".into()),
+            ToolbarItem2::Plugin("@seelen/tb-network-popup".into()),
             ToolbarItem2::Plugin("@default/power".into()),
             ToolbarItem2::Plugin("@seelen/tb-notifications".into()),
             ToolbarItem2::Plugin("@seelen/tb-quick-settings".into()),
