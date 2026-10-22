@@ -1,0 +1,17 @@
+id: "@default/focus-assist"
+metadata:
+  displayName:
+    en: Focus assist
+    es: Asistente de concentración
+  description:
+    en: Shows an icon only while Do Not Disturb (focus assist) is on. Driven by the Windows notification mode event, nothing runs while it is off.
+icon: TbZzz
+target: "@seelen/fancy-toolbar"
+plugin:
+  scopes:
+    - Notifications
+  tooltip: |-
+    return dndActive ? "Do not disturb" : null;
+  template: |-
+    return dndActive ? icon("TbZzz") : "";
+  onClickV2: open("ms-settings:notifications")
