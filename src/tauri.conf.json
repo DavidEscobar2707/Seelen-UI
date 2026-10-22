@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Seelen UI",
+  "productName": "Seelen Lite",
   "identifier": "com.seelen.seelen-ui",
   "version": "../package.json",
   "app": {
@@ -35,10 +35,10 @@
     "publisher": "Seelen",
     "category": "Utility",
     "copyright": "Copyright © 2024",
-    "shortDescription": "Seelen UI",
-    "longDescription": "Seelen UI Fully Customizable Desktop Environment for Windows",
+    "shortDescription": "Seelen Lite",
+    "longDescription": "Seelen Lite: minimal dock and top bar for Windows (fork of Seelen UI)",
     "licenseFile": "../LICENSE",
-    "homepage": "https://github.com/eythaann/Seelen-UI",
+    "homepage": "https://github.com/DavidEscobar2707/Seelen-UI/tree/lite",
     "resources": {
       "static": "static"
     },
@@ -57,8 +57,8 @@
         "sidebarImage": "static/icons/banner.bmp",
         "template": "templates/installer.nsi",
         "installerHooks": "templates/installer-hooks.nsh",
-        "installMode": "perMachine",
-        "startMenuFolder": "Seelen",
+        "installMode": "currentUser",
+        "startMenuFolder": "Seelen Lite",
         "displayLanguageSelector": true,
         "languages": [
           "arabic",

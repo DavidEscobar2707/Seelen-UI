@@ -419,17 +419,15 @@ Var AppStartMenuFolder
 !define MUI_FINISHPAGE_NOAUTOCLOSE
 ; Show discord link
 !define MUI_FINISHPAGE_LINK_COLOR 59a7f6
-!define MUI_FINISHPAGE_LINK "Join us on Discord!"
-!define MUI_FINISHPAGE_LINK_LOCATION "https://discord.seelen.io"
+!define MUI_FINISHPAGE_LINK "Seelen Lite source (AGPL)"
+!define MUI_FINISHPAGE_LINK_LOCATION "https://github.com/DavidEscobar2707/Seelen-UI/tree/lite"
 !define MUI_PAGE_CUSTOMFUNCTION_PRE SkipIfPassive
 !define MUI_PAGE_CUSTOMFUNCTION_LEAVE RunMainBinary
 !insertmacro MUI_PAGE_FINISH
 
 Function RunMainBinary
-  ; Start the service
-  DetailPrint 'Exec: slu-service.exe'
-  Exec '"$INSTDIR\slu-service.exe"'
-  ; nsis_tauri_utils::RunAsUser "$INSTDIR\${MAINBINARYNAME}.exe" ""
+  ; Seelen Lite: no service, start the app directly
+  Exec '"$INSTDIR\${MAINBINARYNAME}.exe"'
 FunctionEnd
 
 ; Uninstaller Pages
